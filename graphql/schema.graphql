@@ -1,0 +1,37 @@
+type Item {
+  id: ID!
+  dateCreatedAt: String
+  modelNumber: String
+  serialNumber: String
+  dateWarrantyBegins: String
+  dateWarrantyExpires: String
+}
+
+input ItemInput {
+  id: ID!
+  dateCreatedAt: String!
+  modelNumber: String!
+  serialNumber: String!
+  dateWarrantyBegins: String!
+  dateWarrantyExpires: String!
+}
+
+input ItemInputUpdate {
+  id: ID!
+  modelNumber: String
+  serialNumber: String
+  dateWarrantyBegins: String
+  dateWarrantyExpires: String
+}
+
+type Query {
+  getItemById(itemId: String!): Item
+  getItemBySerialNumber(serialNumber: String!): Item
+  listItems: [Item]
+}
+
+type Mutation {
+  createItem(item: ItemInput!): item
+  updateItem(item: ItemInputUpdate!): item
+  deleteItem(itemId: String!): String
+}
