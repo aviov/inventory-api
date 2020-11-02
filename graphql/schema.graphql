@@ -31,7 +31,7 @@ type Query {
 }
 
 type Mutation {
-  createItem(item: ItemInput!): item
-  updateItem(item: ItemInputUpdate!): item
+  createItem(item: ItemInput!): Item
+  updateItem(item: ItemInputUpdate!): Item
   deleteItem(itemId: String!): String
 }
