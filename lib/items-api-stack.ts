@@ -66,7 +66,20 @@ export class ItemsApiStack extends cdk.Stack {
     const itemsTable = new ddb.Table(this, 'CDKItemsTable', {
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
+        name: 'id',
+        type: ddb.AttributeType.STRING
+      }
+    });
+
+    // ddb GSI to query by serialNumber
+    itemsTable.addGlobalSecondaryIndex({
+      indexName: 'serialNumberIndex',
+      partitionKey: {
         name: 'serialNumber',
+        type: ddb.AttributeType.STRING
+      },
+      sortKey: {
+        name: 'dateCreatedAt',
         type: ddb.AttributeType.STRING
       }
     });
