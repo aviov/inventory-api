@@ -66,7 +66,7 @@ export class ItemsApiStack extends cdk.Stack {
     const itemsTable = new ddb.Table(this, 'CDKItemsTable', {
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
-        name: 'id',
+        name: 'serialNumber',
         type: ddb.AttributeType.STRING
       }
     });
