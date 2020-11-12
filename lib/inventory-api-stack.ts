@@ -5,25 +5,25 @@ import * as appsync from '@aws-cdk/aws-appsync';
 import * as ddb from '@aws-cdk/aws-dynamodb';
 import * as lambda from '@aws-cdk/aws-lambda';
 
-export class ItemsApiStack extends cdk.Stack {
+export class InventoryApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
     
     // user pool
-    const userPool = new cognito.UserPool(this, 'UserPoolAtItems', {
+    const userPool = new cognito.UserPool(this, 'UserPoolAtInventory', {
       selfSignUpEnabled: true,
       autoVerify: { email: true },
       signInAliases: { email: true }
     });
 
     // user pool client
-    const userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClientAtItems', {
+    const userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClientAtInventory', {
       userPool,
       generateSecret: false
     });
 
     // user identity pool
-    const identityPool = new cognito.CfnIdentityPool(this, 'IdentityPoolAtItems', {
+    const identityPool = new cognito.CfnIdentityPool(this, 'IdentityPoolAtInventory', {
       allowUnauthenticatedIdentities: false,
       cognitoIdentityProviders: [
         {
@@ -34,7 +34,7 @@ export class ItemsApiStack extends cdk.Stack {
     });
 
     // iam role
-    const role = new iam.Role(this, 'AppsyncIamRoleAtItems', {
+    const role = new iam.Role(this, 'AppsyncIamRoleAtInventory', {
       assumedBy: new iam.FederatedPrincipal(
         'cognito-identity.amazonaws.com',
         {
@@ -63,7 +63,7 @@ export class ItemsApiStack extends cdk.Stack {
     );
 
     // identity pool role attachemnt
-    new cognito.CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachmentAtItems', {
+    new cognito.CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachmentAtInventory', {
       identityPoolId: identityPool.ref,
       roles: { authenticated: role.roleArn }
     });
@@ -83,8 +83,8 @@ export class ItemsApiStack extends cdk.Stack {
     });
 
     // api
-    const api = new appsync.GraphqlApi(this, 'Api', {
-      name: 'items-api',
+    const api = new appsync.GraphqlApi(this, 'ApiAtInventory', {
+      name: 'inventory-api',
       schema: appsync.Schema.fromAsset('graphql/schema.graphql'),
       authorizationConfig: {
         defaultAuthorization: {
@@ -112,14 +112,14 @@ export class ItemsApiStack extends cdk.Stack {
     api.grantMutation(role, 'deleteItem');
 
     // lambda data source and resolvers
-    const itemsLambda = new lambda.Function(this, 'AppsyncItemsHandler', {
+    const inventoryLambda = new lambda.Function(this, 'AppsyncItemsHandlerAtInventory', {
       runtime: lambda.Runtime.NODEJS_12_X,
       handler: 'appsync-ds-main.handler',
       code: lambda.Code.fromAsset('lambda-fns'),
       memorySize: 1024
     });
 
-    const lambdaDs = api.addLambdaDataSource('lambdaDatasource', itemsLambda);
+    const lambdaDs = api.addLambdaDataSource('lambdaDatasource', inventoryLambda);
 
     lambdaDs.createResolver({
       typeName: "Query",
@@ -152,7 +152,7 @@ export class ItemsApiStack extends cdk.Stack {
     });
 
     // ddb table
-    const itemsTable = new ddb.Table(this, 'CDKItemsTable', {
+    const inventoryTable = new ddb.Table(this, 'ItemsTableAtInventory', {
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
         name: 'id',
@@ -161,7 +161,7 @@ export class ItemsApiStack extends cdk.Stack {
     });
 
     // ddb GSI to query by serialNumber
-    itemsTable.addGlobalSecondaryIndex({
+    inventoryTable.addGlobalSecondaryIndex({
       indexName: 'serialNumberIndex',
       partitionKey: {
         name: 'serialNumber',
@@ -174,10 +174,10 @@ export class ItemsApiStack extends cdk.Stack {
     });
 
     // ddb table access from lambda
-    itemsTable.grantFullAccess(itemsLambda);
+    inventoryTable.grantFullAccess(inventoryLambda);
 
     // env variable for ddb table
-    itemsLambda.addEnvironment('ITEMS_TABLE', itemsTable.tableName);
+    inventoryLambda.addEnvironment('INVENTORY_TABLE', inventoryTable.tableName);
 
     // print api
     new cdk.CfnOutput(this, 'GraphQLAPIURL', {
@@ -188,7 +188,7 @@ export class ItemsApiStack extends cdk.Stack {
       value: api.apiKey || ''
     });
 
-    new cdk.CfnOutput(this, 'ItemsApiStack Region', {
+    new cdk.CfnOutput(this, 'InventoryApiStack Region', {
       value: this.region
     });
   }

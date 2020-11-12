@@ -3,7 +3,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 async function deleteItem(itemId: String) {
     const params = {
-        TableName: process.env.ITEMS_TABLE,
+        TableName: process.env.INVENTORY_TABLE,
         Key: {
           id: itemId
         }

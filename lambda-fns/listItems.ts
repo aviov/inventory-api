@@ -3,7 +3,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 async function listItems() {
     const params = {
-        TableName: process.env.ITEMS_TABLE,
+        TableName: process.env.INVENTORY_TABLE,
     }
     try {
         const data = await docClient.scan(params).promise()

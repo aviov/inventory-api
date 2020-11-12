@@ -4,7 +4,7 @@ import Item = require('./Item');
 
 async function createItem(item: Item) {
     const params = {
-        TableName: process.env.ITEMS_TABLE,
+        TableName: process.env.INVENTORY_TABLE,
         Item: item
     }
     try {

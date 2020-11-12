@@ -3,7 +3,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 async function getItemBySerialNumber(serialNumber: String) {
     const params = {
-        TableName: process.env.ITEMS_TABLE,
+        TableName: process.env.INVENTORY_TABLE,
         IndexName : "serialNumberIndex",
         ExpressionAttributeValues: {
             ":v": serialNumber

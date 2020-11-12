@@ -12,7 +12,7 @@ interface Params {
 
 async function updateItem(item: any) {
   let params : Params = {
-    TableName: process.env.ITEMS_TABLE,
+    TableName: process.env.INVENTORY_TABLE,
     Key: {
       id: item.id
     },
