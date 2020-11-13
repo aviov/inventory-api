@@ -155,6 +155,10 @@ export class InventoryApiStack extends cdk.Stack {
     const inventoryTable = new ddb.Table(this, 'ItemsTableAtInventory', {
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
+        name: 'userId',
+        type: ddb.AttributeType.STRING
+      },
+      sortKey: {
         name: 'id',
         type: ddb.AttributeType.STRING
       }
@@ -164,11 +168,11 @@ export class InventoryApiStack extends cdk.Stack {
     inventoryTable.addGlobalSecondaryIndex({
       indexName: 'serialNumberIndex',
       partitionKey: {
-        name: 'serialNumber',
+        name: 'userId',
         type: ddb.AttributeType.STRING
       },
       sortKey: {
-        name: 'dateCreatedAt',
+        name: 'serialNumber',
         type: ddb.AttributeType.STRING
       }
     });

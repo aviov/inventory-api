@@ -10,10 +10,11 @@ interface Params {
   ReturnValues: string
 }
 
-async function updateItem(item: any) {
+async function updateItem(item: any, userId: String) {
   let params : Params = {
     TableName: process.env.INVENTORY_TABLE,
     Key: {
+      userId: userId,
       id: item.id
     },
     ExpressionAttributeValues: {},

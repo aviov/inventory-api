@@ -1,17 +1,19 @@
 const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-async function getItemBySerialNumber(serialNumber: String) {
+async function getItemBySerialNumber(serialNumber: String, userId: String) {
     const params = {
         TableName: process.env.INVENTORY_TABLE,
         IndexName : "serialNumberIndex",
         ExpressionAttributeValues: {
-            ":v": serialNumber
+          ":v1": userId,
+          ":v2": serialNumber
         },
         ExpressionAttributeNames: {
-            "#serialNumber": "serialNumber"
+          "#userId": "userId",
+          "#serialNumber": "serialNumber"
         },
-        KeyConditionExpression: "#serialNumber = :v"
+        KeyConditionExpression: "#userId = :v1 AND #serialNumber = :v2"
     }
     try {
         const data = await docClient.query(params).promise();

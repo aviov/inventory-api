@@ -25,15 +25,15 @@ exports.handler = async (event: AppSyncEvent) => {
     case "getItemById":
       return await getItemById(event.arguments.itemId, event.identity.cognitoIdentityId);
     case "getItemBySerialNumber":
-      return await getItemBySerialNumber(event.arguments.serialNumber);
+      return await getItemBySerialNumber(event.arguments.serialNumber, event.identity.cognitoIdentityId);
     case "createItem":
-      return await createItem(event.arguments.item);
+      return await createItem(event.arguments.item, event.identity.cognitoIdentityId);
     case "listItems":
-      return await listItems();
+      return await listItems(event.identity.cognitoIdentityId);
     case "deleteItem":
-      return await deleteItem(event.arguments.itemId);
+      return await deleteItem(event.arguments.itemId, event.identity.cognitoIdentityId);
     case "updateItem":
-      return await updateItem(event.arguments.item);
+      return await updateItem(event.arguments.item, event.identity.cognitoIdentityId);
     default:
       return null;
   }
