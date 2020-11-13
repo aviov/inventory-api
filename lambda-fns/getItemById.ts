@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-async function getItemById(itemId: String) {
+async function getItemById(itemId: String, userId: String) {
     const params = {
         TableName: process.env.INVENTORY_TABLE,
         Key: { id: itemId }

@@ -14,13 +14,16 @@ type AppSyncEvent = {
     itemId: string,
     serialNumber: string,
     item: Item
+  },
+  identity: {
+    cognitoIdentityId: string
   }
 };
 
 exports.handler = async (event: AppSyncEvent) => {
   switch (event.info.fieldName) {
     case "getItemById":
-      return await getItemById(event.arguments.itemId);
+      return await getItemById(event.arguments.itemId, event.identity.cognitoIdentityId);
     case "getItemBySerialNumber":
       return await getItemBySerialNumber(event.arguments.serialNumber);
     case "createItem":
