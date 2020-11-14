@@ -4,10 +4,32 @@ import * as iam from '@aws-cdk/aws-iam';
 import * as appsync from '@aws-cdk/aws-appsync';
 import * as ddb from '@aws-cdk/aws-dynamodb';
 import * as lambda from '@aws-cdk/aws-lambda';
+import * as s3 from '@aws-cdk/aws-s3';
 
 export class InventoryApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // s3
+    const bucket = new s3.Bucket(this, 'BucketAtInventory', {
+      cors: [{
+        maxAge: 3000,
+        allowedOrigins: ['*'],
+        allowedHeaders: ['*'],
+        allowedMethods: [
+          s3.HttpMethods.GET,
+          s3.HttpMethods.PUT,
+          s3.HttpMethods.POST,
+          s3.HttpMethods.DELETE,
+          s3.HttpMethods.POST
+        ],
+      }]
+    });
+
+    // print s3
+    new cdk.CfnOutput(this, 'AttachmentsBucketName', {
+      value: bucket.bucketName
+    });
     
     // user pool
     const userPool = new cognito.UserPool(this, 'UserPoolAtInventory', {
@@ -59,6 +81,17 @@ export class InventoryApiStack extends cdk.Stack {
           'cognito-identity:*',
         ],
         resources: ['*']
+      })
+    );
+
+    // role policy to grant permission to s3 specific folder
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ['s3:*'],
+        effect: iam.Effect.ALLOW,
+        resources: [
+          bucket.bucketArn + "/private/${cognito-identity.amazonaws.com:sub}/*"
+        ],
       })
     );
 

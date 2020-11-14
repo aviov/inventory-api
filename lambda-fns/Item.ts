@@ -5,6 +5,7 @@ interface Item {
   serialNumber: string
   dateWarrantyBegins: string
   dateWarrantyExpires: string
+  attachments: string
 }
 
 export = Item;
