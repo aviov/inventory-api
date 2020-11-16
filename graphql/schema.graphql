@@ -15,7 +15,7 @@ input ItemInput {
   serialNumber: String!
   dateWarrantyBegins: String!
   dateWarrantyExpires: String!
-  attachments: String
+  attachments: String!
 }
 
 input ItemInputUpdate {
