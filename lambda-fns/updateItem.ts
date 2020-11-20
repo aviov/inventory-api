@@ -20,7 +20,7 @@ async function updateItem(item: any, userId: String) {
     ExpressionAttributeValues: {},
     ExpressionAttributeNames: {},
     UpdateExpression: "",
-    ReturnValues: "UPDATED_NEW"
+    ReturnValues: "ALL_NEW"
   };
   let prefix = "set ";
   let attributes = Object.keys(item);
@@ -35,8 +35,9 @@ async function updateItem(item: any, userId: String) {
  }
   console.log('params: ', params)
   try {
-    await docClient.update(params).promise()
-    return item
+    const { Attributes: Item } = await docClient.update(params).promise();
+    const { userId, ...rest } = Item;
+    return rest;
   } catch (err) {
     console.log('DynamoDB error: ', err)
     return null
