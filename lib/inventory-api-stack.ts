@@ -143,6 +143,11 @@ export class InventoryApiStack extends cdk.Stack {
     api.grantMutation(role, 'createItem');
     api.grantMutation(role, 'updateItem');
     api.grantMutation(role, 'deleteItem');
+    api.grantQuery(role, 'listItemTypes');
+    api.grantQuery(role, 'getItemTypeById');
+    api.grantMutation(role, 'createItemType');
+    api.grantMutation(role, 'updateItemType');
+    api.grantMutation(role, 'deleteItemType');
 
     // lambda data source and resolvers
     const inventoryLambda = new lambda.Function(this, 'AppsyncItemsHandlerAtInventory', {
@@ -170,6 +175,16 @@ export class InventoryApiStack extends cdk.Stack {
     });
     
     lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listItemTypes"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getItemTypeById"
+    });
+    
+    lambdaDs.createResolver({
       typeName: "Mutation",
       fieldName: "createItem"
     });
@@ -182,6 +197,21 @@ export class InventoryApiStack extends cdk.Stack {
     lambdaDs.createResolver({
       typeName: "Mutation",
       fieldName: "updateItem"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createItemType"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteItemType"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateItemType"
     });
 
     // ddb table

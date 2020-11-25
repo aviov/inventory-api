@@ -27,14 +27,37 @@ input ItemInputUpdate {
   attachments: String
 }
 
+type ItemType {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+}
+
+input ItemTypeInput {
+  id: ID!
+  dateCreatedAt: String!
+  name: String!
+}
+
+input ItemTypeInputUpdate {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+}
+
 type Query {
   getItemById(itemId: String!): Item
   getItemBySerialNumber(serialNumber: String!): Item
   listItems: [Item]
+  getItemTypeById(itemTypeId: String!): ItemType
+  listItemTypes: [ItemType]
 }
 
 type Mutation {
   createItem(item: ItemInput!): Item
   updateItem(item: ItemInputUpdate!): Item
   deleteItem(itemId: String!): String
+  createItemType(itemType: ItemTypeInput!): ItemType
+  updateItemType(itemType: ItemTypeInputUpdate!): ItemType
+  deleteItemType(itemTypeId: String!): String
 }
