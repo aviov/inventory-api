@@ -4,10 +4,19 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 async function listItems(userId: String) {
     const params = {
       TableName: process.env.INVENTORY_TABLE,
-      KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
-        ':userId': userId
-      }
+        ":v1": userId,
+        ":v2": 'item:'
+      },
+      ExpressionAttributeNames: {
+        "#userId": "userId",
+        "#id": "id"
+      },
+      KeyConditionExpression: "#userId = :v1 AND begins_with(#id, :v2)"
+      // KeyConditionExpression: 'userId = :userId',
+      // ExpressionAttributeValues: {
+      //   ':userId': userId
+      // }
     }
     try {
         const data = await docClient.query(params).promise();

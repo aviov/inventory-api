@@ -23,6 +23,9 @@ type AppSyncEvent = {
     itemTypeId: string,
     itemType: ItemType
   },
+  source: {
+    itemTypeId: string
+  },
   identity: {
     cognitoIdentityId: string
   }
@@ -52,6 +55,8 @@ exports.handler = async (event: AppSyncEvent) => {
       return await deleteItemType(event.arguments.itemTypeId, event.identity.cognitoIdentityId);
     case "updateItemType":
       return await updateItemType(event.arguments.itemType, event.identity.cognitoIdentityId);
+    case "itemType":
+      return await getItemTypeById(event.source.itemTypeId, event.identity.cognitoIdentityId);
     default:
       return null;
   }

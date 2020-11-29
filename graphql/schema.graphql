@@ -6,6 +6,7 @@ type Item {
   dateWarrantyBegins: String
   dateWarrantyExpires: String
   attachments: String
+  itemType: ItemType
 }
 
 input ItemInput {
@@ -16,6 +17,7 @@ input ItemInput {
   dateWarrantyBegins: String!
   dateWarrantyExpires: String!
   attachments: String!
+  itemTypeId: String
 }
 
 input ItemInputUpdate {
@@ -25,6 +27,7 @@ input ItemInputUpdate {
   dateWarrantyBegins: String
   dateWarrantyExpires: String
   attachments: String
+  itemTypeId: String
 }
 
 type ItemType {

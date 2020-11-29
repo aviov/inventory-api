@@ -6,6 +6,7 @@ interface Item {
   dateWarrantyBegins: string
   dateWarrantyExpires: string
   attachments: string
+  itemTypeId: string
 }
 
 export = Item;

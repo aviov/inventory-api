@@ -35,8 +35,8 @@ async function updateItemType(itemType: any, userId: String) {
  }
   console.log('params: ', params)
   try {
-    const { Attributes: ItemType } = await docClient.update(params).promise();
-    const { userId, ...rest } = ItemType;
+    const { Attributes: Item } = await docClient.update(params).promise();
+    const { userId, ...rest } = Item;
     return rest;
   } catch (err) {
     console.log('DynamoDB error: ', err)

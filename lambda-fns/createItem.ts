@@ -5,7 +5,7 @@ import Item = require('./Item');
 async function createItem(item: Item, userId: String) {
     const params = {
         TableName: process.env.INVENTORY_TABLE,
-        Item: { ...item, userId }
+        Item: { ...item, userId, entityType: 'Item' }
     }
     try {
         await docClient.put(params).promise();
