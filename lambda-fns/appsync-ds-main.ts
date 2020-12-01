@@ -56,7 +56,9 @@ exports.handler = async (event: AppSyncEvent) => {
     case "updateItemType":
       return await updateItemType(event.arguments.itemType, event.identity.cognitoIdentityId);
     case "itemType":
-      return await getItemTypeById(event.source.itemTypeId, event.identity.cognitoIdentityId);
+      const itemTypeId = event.source.itemTypeId
+      const itemTypeIdWithoutPrefix = (((typeof itemTypeId) === 'string') && !itemTypeId.startsWith('itemtype:')) ? itemTypeId.slice(itemTypeId.indexOf('itemtype:')) : itemTypeId
+      return await getItemTypeById(itemTypeIdWithoutPrefix, event.identity.cognitoIdentityId);
     default:
       return null;
   }

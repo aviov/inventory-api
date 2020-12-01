@@ -138,16 +138,9 @@ export class InventoryApiStack extends cdk.Stack {
     // api access with iam role
     // api.grant(role, appsync.IamResource.custom('types/Query/listItems'), 'appsync:GraphQL'); // ('types/Query/fields/listItems'), 'appsync:GraphQL')
     api.grantQuery(role);
-    // api.grantQuery(role, 'getItemById');
     // api.grantQuery(role, 'getItemBySerialNumber');
     api.grantMutation(role);
-    // api.grantMutation(role, 'updateItem');
-    // api.grantMutation(role, 'deleteItem');
-    // api.grantQuery(role, 'listItemTypes');
-    // api.grantQuery(role, 'getItemTypeById');
     // api.grantMutation(role, 'createItemType');
-    // api.grantMutation(role, 'updateItemType');
-    // api.grantMutation(role, 'deleteItemType');
 
     // lambda data source and resolvers
     const inventoryLambda = new lambda.Function(this, 'AppsyncItemsHandlerAtInventory', {
