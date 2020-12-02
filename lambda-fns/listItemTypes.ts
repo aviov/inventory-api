@@ -1,12 +1,12 @@
 const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-async function listItems(userId: String) {
+async function listItemTypes(userId: String) {
     const params = {
       TableName: process.env.INVENTORY_TABLE,
       ExpressionAttributeValues: {
         ":v1": userId,
-        ":v2": 'item:'
+        ":v2": 'itemtype:'
       },
       ExpressionAttributeNames: {
         "#userId": "userId",
@@ -30,4 +30,4 @@ async function listItems(userId: String) {
     }
 }
 
-export default listItems;
+export default listItemTypes;

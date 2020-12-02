@@ -4,7 +4,13 @@ import getItemById from './getItemById';
 import getItemBySerialNumber from './getItemBySerialNumber';
 import listItems from './listItems';
 import updateItem from './updateItem';
+import createItemType from './createItemType';
+import deleteItemType from './deleteItemType';
+import getItemTypeById from './getItemTypeById';
+import listItemTypes from './listItemTypes';
+import updateItemType from './updateItemType';
 import Item = require('./Item');
+import ItemType = require('./ItemType');
 
 type AppSyncEvent = {
   info: {
@@ -13,7 +19,12 @@ type AppSyncEvent = {
   arguments: {
     itemId: string,
     serialNumber: string,
-    item: Item
+    item: Item,
+    itemTypeId: string,
+    itemType: ItemType
+  },
+  source: {
+    itemTypeId: string
   },
   identity: {
     cognitoIdentityId: string
@@ -34,6 +45,20 @@ exports.handler = async (event: AppSyncEvent) => {
       return await deleteItem(event.arguments.itemId, event.identity.cognitoIdentityId);
     case "updateItem":
       return await updateItem(event.arguments.item, event.identity.cognitoIdentityId);
+    case "getItemTypeById":
+      return await getItemTypeById(event.arguments.itemTypeId, event.identity.cognitoIdentityId);
+    case "createItemType":
+      return await createItemType(event.arguments.itemType, event.identity.cognitoIdentityId);
+    case "listItemTypes":
+      return await listItemTypes(event.identity.cognitoIdentityId);
+    case "deleteItemType":
+      return await deleteItemType(event.arguments.itemTypeId, event.identity.cognitoIdentityId);
+    case "updateItemType":
+      return await updateItemType(event.arguments.itemType, event.identity.cognitoIdentityId);
+    case "itemType":
+      const itemTypeId = event.source.itemTypeId
+      const itemTypeIdWithoutPrefix = (((typeof itemTypeId) === 'string') && !itemTypeId.startsWith('itemtype:')) ? itemTypeId.slice(itemTypeId.indexOf('itemtype:')) : itemTypeId
+      return await getItemTypeById(itemTypeIdWithoutPrefix, event.identity.cognitoIdentityId);
     default:
       return null;
   }

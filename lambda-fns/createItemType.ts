@@ -1,19 +1,19 @@
 const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
-import Item = require('./Item');
+import ItemType = require('./ItemType');
 
-async function createItem(item: Item, userId: String) {
+async function createItemType(itemType: ItemType, userId: String) {
     const params = {
         TableName: process.env.INVENTORY_TABLE,
-        Item: { ...item, userId, entityType: 'Item' }
+        Item: { ...itemType, userId, entityType: 'ItemType' }
     }
     try {
         await docClient.put(params).promise();
-        return item;
+        return itemType;
     } catch (err) {
         console.log('DynamoDB error: ', err);
         return null;
     }
 }
 
-export default createItem;
+export default createItemType;
