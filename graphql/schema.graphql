@@ -48,12 +48,38 @@ input ItemTypeInputUpdate {
   name: String
 }
 
+type EndUser {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  email: String
+  phone: String
+}
+
+input EndUserInput {
+  id: ID!
+  dateCreatedAt: String!
+  name: String!
+  email: String!
+  phone: String!
+}
+
+input EndUserInputUpdate {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  email: String
+  phone: String
+}
+
 type Query {
   getItemById(itemId: String!): Item
   getItemBySerialNumber(serialNumber: String!): Item
   listItems: [Item]
   getItemTypeById(itemTypeId: String!): ItemType
   listItemTypes: [ItemType]
+  getEndUserById(endUserId: String!): EndUser
+  listEndUsers: [EndUser]
 }
 
 type Mutation {
@@ -63,4 +89,7 @@ type Mutation {
   createItemType(itemType: ItemTypeInput!): ItemType
   updateItemType(itemType: ItemTypeInputUpdate!): ItemType
   deleteItemType(itemTypeId: String!): String
+  createEndUser(endUser: EndUserInput!): EndUser
+  updateEndUser(endUser: EndUserInputUpdate!): EndUser
+  deleteEndUser(endUserId: String!): String
 }

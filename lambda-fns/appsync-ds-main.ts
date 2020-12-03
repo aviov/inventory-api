@@ -9,8 +9,14 @@ import deleteItemType from './deleteItemType';
 import getItemTypeById from './getItemTypeById';
 import listItemTypes from './listItemTypes';
 import updateItemType from './updateItemType';
+import createEndUser from './createEndUser';
+import updateOne from './updateOne';
+import deleteOne from './deleteOne';
+import list from './list';
+import getOneById from './getOneById';
 import Item = require('./Item');
 import ItemType = require('./ItemType');
+import EndUser = require('./EndUser');
 
 type AppSyncEvent = {
   info: {
@@ -21,7 +27,9 @@ type AppSyncEvent = {
     serialNumber: string,
     item: Item,
     itemTypeId: string,
-    itemType: ItemType
+    itemType: ItemType,
+    endUserId: string,
+    endUser: EndUser
   },
   source: {
     itemTypeId: string
@@ -59,6 +67,16 @@ exports.handler = async (event: AppSyncEvent) => {
       const itemTypeId = event.source.itemTypeId
       const itemTypeIdWithoutPrefix = (((typeof itemTypeId) === 'string') && !itemTypeId.startsWith('itemtype:')) ? itemTypeId.slice(itemTypeId.indexOf('itemtype:')) : itemTypeId
       return await getItemTypeById(itemTypeIdWithoutPrefix, event.identity.cognitoIdentityId);
+    case "listEndUsers":
+      return await list('EndUser', event.identity.cognitoIdentityId);
+    case "getEndUserById":
+      return await getOneById(event.arguments.endUserId, event.identity.cognitoIdentityId);
+    case "createEndUser":
+      return await createEndUser(event.arguments.endUser, event.identity.cognitoIdentityId);
+    case "updateEndUser":
+      return await updateOne(event.arguments.endUser, event.identity.cognitoIdentityId);
+    case "deleteEndUser":
+      return await deleteOne(event.arguments.endUserId, event.identity.cognitoIdentityId);
     default:
       return null;
   }

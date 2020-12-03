@@ -211,6 +211,31 @@ export class InventoryApiStack extends cdk.Stack {
       typeName: 'Item',
       fieldName: 'itemType'
     });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listEndUsers"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getEndUserById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createEndUser"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateEndUser"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteEndUser"
+    });
 
     // ddb table
     const inventoryTable = new ddb.Table(this, 'ItemsTableAtInventory', {
