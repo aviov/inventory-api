@@ -211,6 +211,11 @@ export class InventoryApiStack extends cdk.Stack {
       typeName: 'Item',
       fieldName: 'itemType'
     });
+
+    lambdaDs.createResolver({
+      typeName: 'Item',
+      fieldName: 'actions'
+    });
     
     lambdaDs.createResolver({
       typeName: "Query",
@@ -236,6 +241,36 @@ export class InventoryApiStack extends cdk.Stack {
       typeName: "Mutation",
       fieldName: "deleteEndUser"
     });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listActions"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getActionById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createAction"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateAction"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteAction"
+    });
+
+    lambdaDs.createResolver({
+      typeName: 'Action',
+      fieldName: 'endUser'
+    });
 
     // ddb table
     const inventoryTable = new ddb.Table(this, 'ItemsTableAtInventory', {
@@ -246,6 +281,19 @@ export class InventoryApiStack extends cdk.Stack {
       },
       sortKey: {
         name: 'id',
+        type: ddb.AttributeType.STRING
+      }
+    });
+
+    // ddb GSI to query by itemId
+    inventoryTable.addGlobalSecondaryIndex({
+      indexName: 'itemIdIndex',
+      partitionKey: {
+        name: 'userId',
+        type: ddb.AttributeType.STRING
+      },
+      sortKey: {
+        name: 'itemId',
         type: ddb.AttributeType.STRING
       }
     });
