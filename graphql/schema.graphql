@@ -7,6 +7,7 @@ type Item {
   dateWarrantyExpires: String
   attachments: String
   itemType: ItemType
+  actions: [Action]
 }
 
 input ItemInput {
@@ -72,6 +73,35 @@ input EndUserInputUpdate {
   phone: String
 }
 
+
+type Action {
+  id: ID!
+  dateCreatedAt: String
+  item: Item
+  endUser: EndUser
+  dateActionStart: String
+  dateActionEnd: String
+}
+
+input ActionInput {
+  id: ID!
+  dateCreatedAt: String!
+  itemId: String!
+  endUserId: String!
+  dateActionStart: String!
+  dateActionEnd: String!
+}
+
+input ActionInputUpdate {
+  id: ID!
+  dateCreatedAt: String
+  itemId: String
+  endUserId: String
+  dateActionStart: String
+  dateActionEnd: String
+}
+
+
 type Query {
   getItemById(itemId: String!): Item
   getItemBySerialNumber(serialNumber: String!): Item
@@ -80,6 +110,8 @@ type Query {
   listItemTypes: [ItemType]
   getEndUserById(endUserId: String!): EndUser
   listEndUsers: [EndUser]
+  getActionById(actionId: String!): Action
+  listActions: [Action]
 }
 
 type Mutation {
@@ -92,4 +124,7 @@ type Mutation {
   createEndUser(endUser: EndUserInput!): EndUser
   updateEndUser(endUser: EndUserInputUpdate!): EndUser
   deleteEndUser(endUserId: String!): String
+  createAction(action: ActionInput!): Action
+  updateAction(action: ActionInputUpdate!): Action
+  deleteAction(actionId: String!): String
 }

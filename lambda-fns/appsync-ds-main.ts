@@ -7,6 +7,7 @@ import updateItem from './updateItem';
 import createItemType from './createItemType';
 import deleteItemType from './deleteItemType';
 import getItemTypeById from './getItemTypeById';
+import listById from './listById';
 import listItemTypes from './listItemTypes';
 import updateItemType from './updateItemType';
 import createEndUser from './createEndUser';
@@ -14,9 +15,14 @@ import updateOne from './updateOne';
 import deleteOne from './deleteOne';
 import list from './list';
 import getOneById from './getOneById';
+import createAction from './createAction';
 import Item = require('./Item');
 import ItemType = require('./ItemType');
 import EndUser = require('./EndUser');
+import Action = require('./Action');
+import {
+  sliceStringFrom
+} from './util-fns';
 
 type AppSyncEvent = {
   info: {
@@ -29,10 +35,15 @@ type AppSyncEvent = {
     itemTypeId: string,
     itemType: ItemType,
     endUserId: string,
-    endUser: EndUser
+    endUser: EndUser,
+    actionId: string,
+    action: Action,
   },
   source: {
-    itemTypeId: string
+    id: string,
+    itemTypeId: string,
+    itemId: string,
+    endUserId: string
   },
   identity: {
     cognitoIdentityId: string
@@ -67,6 +78,8 @@ exports.handler = async (event: AppSyncEvent) => {
       const itemTypeId = event.source.itemTypeId
       const itemTypeIdWithoutPrefix = (((typeof itemTypeId) === 'string') && !itemTypeId.startsWith('itemtype:')) ? itemTypeId.slice(itemTypeId.indexOf('itemtype:')) : itemTypeId
       return await getItemTypeById(itemTypeIdWithoutPrefix, event.identity.cognitoIdentityId);
+    case "actions":
+      return await listById(('action:' + event.source.id), event.identity.cognitoIdentityId);
     case "listEndUsers":
       return await list('EndUser', event.identity.cognitoIdentityId);
     case "getEndUserById":
@@ -77,6 +90,20 @@ exports.handler = async (event: AppSyncEvent) => {
       return await updateOne(event.arguments.endUser, event.identity.cognitoIdentityId);
     case "deleteEndUser":
       return await deleteOne(event.arguments.endUserId, event.identity.cognitoIdentityId);
+    case "listActions":
+      return await list('Action', event.identity.cognitoIdentityId);
+    case "getActionById":
+      return await getOneById(event.arguments.actionId, event.identity.cognitoIdentityId);
+    case "createAction":
+      return await createAction(event.arguments.action, event.identity.cognitoIdentityId);
+    case "updateAction":
+      return await updateOne(event.arguments.action, event.identity.cognitoIdentityId);
+    case "deleteAction":
+      return await deleteOne(event.arguments.actionId, event.identity.cognitoIdentityId);
+    case "item":
+      return await getOneById(sliceStringFrom(event.source.itemId, 'item:'), event.identity.cognitoIdentityId);
+    case "endUser":
+      return await getOneById(sliceStringFrom(event.source.endUserId, 'enduser:'), event.identity.cognitoIdentityId);
     default:
       return null;
   }
