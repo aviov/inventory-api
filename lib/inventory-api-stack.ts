@@ -272,6 +272,36 @@ export class InventoryApiStack extends cdk.Stack {
       fieldName: 'endUser'
     });
 
+    lambdaDs.createResolver({
+      typeName: 'Action',
+      fieldName: 'location'
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listLocations"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getLocationById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createLocation"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateLocation"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteLocation"
+    });
+
     // ddb table
     const inventoryTable = new ddb.Table(this, 'ItemsTableAtInventory', {
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,

@@ -16,10 +16,12 @@ import deleteOne from './deleteOne';
 import list from './list';
 import getOneById from './getOneById';
 import createAction from './createAction';
+import createLocation from './createLocation';
 import Item = require('./Item');
 import ItemType = require('./ItemType');
 import EndUser = require('./EndUser');
 import Action = require('./Action');
+import Location = require('./Location');
 import {
   sliceStringFrom
 } from './util-fns';
@@ -38,12 +40,16 @@ type AppSyncEvent = {
     endUser: EndUser,
     actionId: string,
     action: Action,
+    locationId: string,
+    location: Location
   },
   source: {
     id: string,
     itemTypeId: string,
+    actionId: string,
     itemId: string,
-    endUserId: string
+    endUserId: string,
+    locationId: string
   },
   identity: {
     cognitoIdentityId: string
@@ -75,9 +81,7 @@ exports.handler = async (event: AppSyncEvent) => {
     case "updateItemType":
       return await updateItemType(event.arguments.itemType, event.identity.cognitoIdentityId);
     case "itemType":
-      const itemTypeId = event.source.itemTypeId
-      const itemTypeIdWithoutPrefix = (((typeof itemTypeId) === 'string') && !itemTypeId.startsWith('itemtype:')) ? itemTypeId.slice(itemTypeId.indexOf('itemtype:')) : itemTypeId
-      return await getItemTypeById(itemTypeIdWithoutPrefix, event.identity.cognitoIdentityId);
+      return await getOneById(sliceStringFrom(event.source.itemTypeId, 'itemtype:'), event.identity.cognitoIdentityId);
     case "actions":
       return await listById(('action:' + event.source.id), event.identity.cognitoIdentityId);
     case "listEndUsers":
@@ -104,6 +108,18 @@ exports.handler = async (event: AppSyncEvent) => {
       return await getOneById(sliceStringFrom(event.source.itemId, 'item:'), event.identity.cognitoIdentityId);
     case "endUser":
       return await getOneById(sliceStringFrom(event.source.endUserId, 'enduser:'), event.identity.cognitoIdentityId);
+    case "location":
+      return await getOneById(sliceStringFrom(event.source.locationId, 'location:'), event.identity.cognitoIdentityId);
+    case "listLocations":
+      return await list('Location', event.identity.cognitoIdentityId);
+    case "getLocationById":
+      return await getOneById(event.arguments.locationId, event.identity.cognitoIdentityId);
+    case "createLocation":
+      return await createLocation(event.arguments.location, event.identity.cognitoIdentityId);
+    case "updateLocation":
+      return await updateOne(event.arguments.location, event.identity.cognitoIdentityId);
+    case "deleteLocation":
+      return await deleteOne(event.arguments.locationId, event.identity.cognitoIdentityId);
     default:
       return null;
   }
