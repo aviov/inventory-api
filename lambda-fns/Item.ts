@@ -3,6 +3,7 @@ interface Item {
   dateCreatedAt: string
   modelNumber: string
   serialNumber: string
+  inventoryNumber: string
   dateWarrantyBegins: string
   dateWarrantyExpires: string
   attachments: string

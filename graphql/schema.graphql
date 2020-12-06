@@ -3,6 +3,7 @@ type Item {
   dateCreatedAt: String
   modelNumber: String
   serialNumber: String
+  inventoryNumber: String
   dateWarrantyBegins: String
   dateWarrantyExpires: String
   attachments: String
@@ -15,6 +16,7 @@ input ItemInput {
   dateCreatedAt: String!
   modelNumber: String!
   serialNumber: String!
+  inventoryNumber: String
   dateWarrantyBegins: String!
   dateWarrantyExpires: String!
   attachments: String!
@@ -25,6 +27,7 @@ input ItemInputUpdate {
   id: ID!
   modelNumber: String
   serialNumber: String
+  inventoryNumber: String
   dateWarrantyBegins: String
   dateWarrantyExpires: String
   attachments: String
