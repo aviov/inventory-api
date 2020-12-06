@@ -11,7 +11,7 @@ async function createAction(action: Action, userId: string) {
     }
     try {
         await docClient.put(params).promise();
-        // await updateOne({ id: sliceStringFrom(action.itemId, 'item:'), dataActions: action.dataActions }, userId);
+        // await updateOne({ id: sliceStringFrom(action.itemId, 'item:'), actionId: 'item:' + action.id }, userId);
         return action;
     } catch (err) {
         console.log('DynamoDB error: ', err);
