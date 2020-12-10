@@ -85,6 +85,7 @@ type Action {
   location: Location
   dateActionStart: String
   dateActionEnd: String
+  actionType: ActionType
 }
 
 input ActionInput {
@@ -95,6 +96,7 @@ input ActionInput {
   locationId: String!
   dateActionStart: String!
   dateActionEnd: String!
+  actionTypeId: String
 }
 
 input ActionInputUpdate {
@@ -105,6 +107,32 @@ input ActionInputUpdate {
   locationId: String
   dateActionStart: String
   dateActionEnd: String
+  actionTypeId: String
+}
+
+
+type ActionType {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  isVisibleLatest: Boolean
+  isVisibleNext: Boolean
+}
+
+input ActionTypeInput {
+  id: ID!
+  dateCreatedAt: String!
+  name: String!
+  isVisibleLatest: Boolean
+  isVisibleNext: Boolean
+}
+
+input ActionTypeInputUpdate {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  isVisibleLatest: Boolean
+  isVisibleNext: Boolean
 }
 
 
@@ -157,6 +185,8 @@ type Query {
   listEndUsers: [EndUser]
   getActionById(actionId: String!): Action
   listActions: [Action]
+  getActionTypeById(actionTypeId: String!): ActionType
+  listActionTypes: [ActionType]
   getLocationById(locationId: String!): Location
   listLocations: [Location]
 }
@@ -174,6 +204,9 @@ type Mutation {
   createAction(action: ActionInput!): Action
   updateAction(action: ActionInputUpdate!): Action
   deleteAction(actionId: String!): String
+  createActionType(actionType: ActionTypeInput!): ActionType
+  updateActionType(actionType: ActionTypeInputUpdate!): ActionType
+  deleteActionType(actionTypeId: String!): String
   createLocation(location: LocationInput!): Location
   updateLocation(location: LocationInputUpdate!): Location
   deleteLocation(locationId: String!): String

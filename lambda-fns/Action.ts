@@ -6,6 +6,7 @@ interface Action {
   dateActionStart: string
   dateActionEnd: string
   dataActions: string
+  actionTypeId: string
 };
 
 export = Action;
