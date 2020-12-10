@@ -16,11 +16,13 @@ import deleteOne from './deleteOne';
 import list from './list';
 import getOneById from './getOneById';
 import createAction from './createAction';
+import createActionType from './createActionType';
 import createLocation from './createLocation';
 import Item = require('./Item');
 import ItemType = require('./ItemType');
 import EndUser = require('./EndUser');
 import Action = require('./Action');
+import ActionType = require('./ActionType');
 import Location = require('./Location');
 import {
   sliceStringFrom
@@ -40,6 +42,8 @@ type AppSyncEvent = {
     endUser: EndUser,
     actionId: string,
     action: Action,
+    actionTypeId: string,
+    actionType: ActionType,
     locationId: string,
     location: Location
   },
@@ -49,7 +53,8 @@ type AppSyncEvent = {
     actionId: string,
     itemId: string,
     endUserId: string,
-    locationId: string
+    locationId: string,
+    actionTypeId: string
   },
   identity: {
     cognitoIdentityId: string
@@ -110,6 +115,18 @@ exports.handler = async (event: AppSyncEvent) => {
       return await getOneById(sliceStringFrom(event.source.endUserId, 'enduser:'), event.identity.cognitoIdentityId);
     case "location":
       return await getOneById(sliceStringFrom(event.source.locationId, 'location:'), event.identity.cognitoIdentityId);
+    case "actionType":
+      return await getOneById(sliceStringFrom(event.source.actionTypeId, 'actiontype:'), event.identity.cognitoIdentityId);
+    case "listActionTypes":
+      return await list('ActionType', event.identity.cognitoIdentityId);
+    case "getActionTypeById":
+      return await getOneById(event.arguments.actionTypeId, event.identity.cognitoIdentityId);
+    case "createActionType":
+      return await createActionType(event.arguments.actionType, event.identity.cognitoIdentityId);
+    case "updateActionType":
+      return await updateOne(event.arguments.actionType, event.identity.cognitoIdentityId);
+    case "deleteActionType":
+      return await deleteOne(event.arguments.actionTypeId, event.identity.cognitoIdentityId);
     case "listLocations":
       return await list('Location', event.identity.cognitoIdentityId);
     case "getLocationById":
