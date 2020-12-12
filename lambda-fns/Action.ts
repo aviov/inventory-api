@@ -7,6 +7,7 @@ interface Action {
   dateActionEnd: string
   dataActions: string
   actionTypeId: string
+  attachments: string
 };
 
 export = Action;
