@@ -3,7 +3,9 @@ interface EndUser {
   dateCreatedAt: string
   name: string
   email: string
+  emailVerified: string
   phone: string
+  isClientSendEmail: boolean
 };
 
 export = EndUser;
