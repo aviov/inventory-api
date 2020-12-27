@@ -19,7 +19,7 @@ async function verifyEndUserEmailRequest(endUser: EndUser, userId: string) {
   const bodyHtml = verifyEndUserEmailHtml(endUser, link);
   const { emailVerified } = await updateOne({ id: endUser.id, emailVerified: '' }, userId);
   if (emailVerified === '') {
-    const result = await verifySendEmail('juri@keepserv.io', bodyHtml);
+    const result = await verifySendEmail(endUser.email, bodyHtml);
     // console.log(
     //   'token', token,
     //   'bodyHtml', bodyHtml,

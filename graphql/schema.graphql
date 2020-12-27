@@ -57,7 +57,9 @@ type EndUser {
   dateCreatedAt: String
   name: String
   email: String
+  emailVerified: String
   phone: String
+  isClientSendEmail: Boolean
 }
 
 input EndUserInput {
@@ -74,6 +76,69 @@ input EndUserInputUpdate {
   name: String
   email: String
   phone: String
+  isClientSendEmail: Boolean
+}
+
+
+type ItemFuture @aws_iam @aws_api_key {
+  id: ID!
+  dateCreatedAt: String
+  modelNumber: String
+  serialNumber: String
+  inventoryNumber: String
+  dateWarrantyBegins: String
+  dateWarrantyExpires: String
+  attachments: String
+  itemType: ItemType
+  actions: [Action]
+}
+
+type EndUserFuture @aws_iam @aws_api_key {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  email: String
+  emailVerified: String
+  phone: String
+  isClientSendEmail: Boolean 
+}
+
+type LocationFuture @aws_iam @aws_api_key {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  email: String
+  phone: String
+  webPage: String
+  country: String
+  city: String
+  street: String
+  address: String
+}
+
+type ActionTypeFuture @aws_iam @aws_api_key {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  isVisibleLatest: Boolean
+  isVisibleNext: Boolean
+}
+
+type ActionFuture @aws_iam @aws_api_key {
+  id: ID!
+  userId: String
+  dateCreatedAt: String
+  item: ItemFuture
+  @aws_iam @aws_api_key
+  endUser: EndUserFuture
+  @aws_iam @aws_api_key
+  location: LocationFuture
+  @aws_iam @aws_api_key
+  dateActionStart: String
+  dateActionEnd: String
+  actionType: ActionTypeFuture
+  @aws_iam @aws_api_key
+  attachments: String
 }
 
 
@@ -178,7 +243,7 @@ input LocationInputUpdate {
 }
 
 
-type Query {
+type Query @aws_iam @aws_api_key {
   getItemById(itemId: String!): Item
   getItemBySerialNumber(serialNumber: String!): Item
   listItems: [Item]
@@ -188,6 +253,8 @@ type Query {
   listEndUsers: [EndUser]
   getActionById(actionId: String!): Action
   listActions: [Action]
+  clientListActionsFuture: [ActionFuture]
+  @aws_iam @aws_api_key
   getActionTypeById(actionTypeId: String!): ActionType
   listActionTypes: [ActionType]
   getLocationById(locationId: String!): Location
@@ -203,6 +270,9 @@ type Mutation {
   deleteItemType(itemTypeId: String!): String
   createEndUser(endUser: EndUserInput!): EndUser
   updateEndUser(endUser: EndUserInputUpdate!): EndUser
+  verifyEndUserEmailRequest(endUser: EndUserInputUpdate!): String
+  verifyEndUserEmailConfirm(endUserToken: String!): String
+  @aws_iam @aws_api_key
   deleteEndUser(endUserId: String!): String
   createAction(action: ActionInput!): Action
   updateAction(action: ActionInputUpdate!): Action

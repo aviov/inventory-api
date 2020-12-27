@@ -5,6 +5,8 @@ import * as appsync from '@aws-cdk/aws-appsync';
 import * as ddb from '@aws-cdk/aws-dynamodb';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as s3 from '@aws-cdk/aws-s3';
+import * as events from '@aws-cdk/aws-events';
+import * as targets from '@aws-cdk/aws-events-targets';
 
 export class InventoryApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -236,10 +238,45 @@ export class InventoryApiStack extends cdk.Stack {
       typeName: "Mutation",
       fieldName: "updateEndUser"
     });
+
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: 'verifyEndUserEmailRequest'
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: 'verifyEndUserEmailConfirm'
+    });
     
     lambdaDs.createResolver({
       typeName: "Mutation",
       fieldName: "deleteEndUser"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "clientListActionsFuture"
+    });
+
+    lambdaDs.createResolver({
+      typeName: 'ActionFuture',
+      fieldName: 'item'
+    });
+
+    lambdaDs.createResolver({
+      typeName: 'ActionFuture',
+      fieldName: 'endUser'
+    });
+
+    lambdaDs.createResolver({
+      typeName: 'ActionFuture',
+      fieldName: 'location'
+    });
+
+    lambdaDs.createResolver({
+      typeName: 'ActionFuture',
+      fieldName: 'actionType'
     });
     
     lambdaDs.createResolver({
@@ -358,6 +395,19 @@ export class InventoryApiStack extends cdk.Stack {
       }
     });
 
+    // ddb GSI to query by id, inverted primary key
+    inventoryTable.addGlobalSecondaryIndex({
+      indexName: 'actionIdIndex',
+      partitionKey: {
+        name: 'entityType',
+        type: ddb.AttributeType.STRING
+      },
+      sortKey: {
+        name: 'dateActionStart',
+        type: ddb.AttributeType.STRING
+      }
+    });
+
     // ddb GSI to query by serialNumber
     inventoryTable.addGlobalSecondaryIndex({
       indexName: 'serialNumberIndex',
@@ -371,11 +421,56 @@ export class InventoryApiStack extends cdk.Stack {
       }
     });
 
+    // // ddb GSI to query Entity type by id, used in mutation verifyEndUserEmail
+    // inventoryTable.addGlobalSecondaryIndex({
+    //   indexName: 'entityIdIndex',
+    //   partitionKey: {
+    //     name: 'entityType',
+    //     type: ddb.AttributeType.STRING
+    //   },
+    //   sortKey: {
+    //     name: 'id',
+    //     type: ddb.AttributeType.STRING
+    //   }
+    // });
+
     // ddb table access from lambda
     inventoryTable.grantFullAccess(inventoryLambda);
 
     // env variable for ddb table
     inventoryLambda.addEnvironment('INVENTORY_TABLE', inventoryTable.tableName);
+
+    // permission for items lambda to send emails
+    inventoryLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          'ses:SendEmail'
+        ],
+        effect: iam.Effect.ALLOW,
+        resources: ['arn:aws:ses:us-east-1:*:identity/*'],
+      }
+    ));
+
+    // option 1
+    // email lambda as target
+    const sendEmailsTarget = new targets.LambdaFunction(inventoryLambda);
+
+    new events.Rule(this, 'emailScheduleRule', {
+      // schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
+      schedule: events.Schedule.expression('cron(42 5 ? * MON-SUN *)'),
+      targets: [sendEmailsTarget]
+    });
+
+    // // option 2
+    // // rule for email events
+    // const emailEventRule = new events.Rule(this, 'emailScheduleRule', {
+    // // schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
+    // // schedule: events.Schedule.cron({ minute: '57', hour: '18' }),
+    // // schedule: events.Schedule.expression('cron(3 9 * * ? *)'),
+    //   schedule: events.Schedule.rate(cdk.Duration.minutes(3))
+    // });
+    // // connect email lambda and email rule
+    // emailEventRule.addTarget(new targets.LambdaFunction(emailLambda));
 
     // print api
     new cdk.CfnOutput(this, 'GraphQLAPIURL', {
