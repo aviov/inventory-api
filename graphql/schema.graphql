@@ -80,6 +80,69 @@ input EndUserInputUpdate {
 }
 
 
+type EndUserInfo {
+  id: ID!
+  dateCreatedAt: String
+  endUser: EndUser
+  group: Group
+  invitedBy: String
+  dateInvitedAt: String
+  inviteInfo: String
+  confirmedBy: String
+  dateConfirmedAt: String
+}
+
+input EndUserInfoInput {
+  id: ID!
+  dateCreatedAt: String!
+  endUserId: String!
+  groupId: String!
+  invitedBy: String
+  inviteInfo: String
+  dateInvitedAt: String!
+  confirmedBy: String
+  dateConfirmedAt: String
+}
+
+input EndUserInfoInputUpdate {
+  id: ID!
+  groupId: String
+  dateConfirmedAt: String
+}
+
+
+type Group {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  regNr: String
+  email: String
+  phone: String
+  webPage: String
+  endUserInfos: [EndUserInfo]!
+}
+
+input GroupInput {
+  id: ID!
+  dateCreatedAt: String!
+  name: String!
+  regNr: String
+  email: String
+  phone: String
+  webPage: String
+}
+
+input GroupInputUpdate {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  regNr: String
+  email: String
+  phone: String
+  webPage: String
+}
+
+
 type ItemFuture @aws_iam @aws_api_key {
   id: ID!
   dateCreatedAt: String
@@ -251,6 +314,10 @@ type Query @aws_iam @aws_api_key {
   listItemTypes: [ItemType]
   getEndUserById(endUserId: String!): EndUser
   listEndUsers: [EndUser]
+  getEndUserInfoById(endUserInfoId: String!): EndUserInfo
+  listEndUserInfos: [EndUserInfo]
+  getGroupById(groupId: String!): Group
+  listGroups: [Group]
   getActionById(actionId: String!): Action
   listActions: [Action]
   clientListActionsFuture: [ActionFuture]
@@ -274,6 +341,15 @@ type Mutation {
   verifyEndUserEmailConfirm(endUserToken: String!): String
   @aws_iam @aws_api_key
   deleteEndUser(endUserId: String!): String
+  createEndUserInfo(endUserInfo: EndUserInfoInput!): EndUserInfo
+  updateEndUserInfo(endUserInfo: EndUserInfoInputUpdate!): EndUserInfo
+  inviteEndUserRequest(endUserInfo: EndUserInfoInput!): EndUserInfo
+  inviteEndUserConfirm(endUserInfoToken: String!): String
+  @aws_iam @aws_api_key
+  deleteEndUserInfo(endUserInfoId: String!): String
+  createGroup(group: GroupInput!): Group
+  updateGroup(group: GroupInputUpdate!): Group
+  deleteGroup(groupId: String!): String
   createAction(action: ActionInput!): Action
   updateAction(action: ActionInputUpdate!): Action
   deleteAction(actionId: String!): String
