@@ -255,6 +255,31 @@ export class InventoryApiStack extends cdk.Stack {
     });
     
     lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createEndUserInfo"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateEndUserInfo"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: 'inviteEndUserRequest'
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: 'inviteEndUserConfirm'
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteEndUserInfo"
+    });
+    
+    lambdaDs.createResolver({
       typeName: "Query",
       fieldName: "clientListActionsFuture"
     });
@@ -368,6 +393,46 @@ export class InventoryApiStack extends cdk.Stack {
       typeName: "Mutation",
       fieldName: "deleteLocation"
     });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listGroups"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getGroupById"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Group",
+      fieldName: "endUserInfos"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "EndUserInfo",
+      fieldName: "endUser"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "EndUserInfo",
+      fieldName: "group"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createGroup"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateGroup"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteGroup"
+    });
 
     // ddb table
     const inventoryTable = new ddb.Table(this, 'ItemsTableAtInventory', {
@@ -395,7 +460,7 @@ export class InventoryApiStack extends cdk.Stack {
       }
     });
 
-    // ddb GSI to query by id, inverted primary key
+    // ddb GSI to query recent actions arranged by start date
     inventoryTable.addGlobalSecondaryIndex({
       indexName: 'actionIdIndex',
       partitionKey: {
@@ -404,6 +469,19 @@ export class InventoryApiStack extends cdk.Stack {
       },
       sortKey: {
         name: 'dateActionStart',
+        type: ddb.AttributeType.STRING
+      }
+    });
+
+    // ddb GSI to query data of different entityTypes by groupId
+    inventoryTable.addGlobalSecondaryIndex({
+      indexName: 'groupIdIndex',
+      partitionKey: {
+        name: 'groupId',
+        type: ddb.AttributeType.STRING
+      },
+      sortKey: {
+        name: 'entityType',
         type: ddb.AttributeType.STRING
       }
     });

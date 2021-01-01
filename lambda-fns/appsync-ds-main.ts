@@ -13,6 +13,9 @@ import updateItemType from './updateItemType';
 import createEndUser from './createEndUser';
 import verifyEndUserEmailRequest from './verifyEndUserEmailRequest';
 import verifyEndUserEmailConfirm from './verifyEndUserEmailConfirm';
+import endUserInviteRequestEmail from './endUserInviteRequestEmail';
+import endUserInviteConfirmEmail from './endUserInviteConfirmEmail';
+import listAtGroup from './listAtGroup';
 import updateOne from './updateOne';
 import deleteOne from './deleteOne';
 import list from './list';
@@ -22,9 +25,12 @@ import clientShceduledEmails from './clientScheduledEmails';
 import clientListActionsFuture from './clientListActionsFuture';
 import createActionType from './createActionType';
 import createLocation from './createLocation';
+import createGroup from './createGroup';
 import Item = require('./Item');
 import ItemType = require('./ItemType');
 import EndUser = require('./EndUser');
+import EndUserInfo = require('./EndUserInfo');
+import Group = require('./Group');
 import Action = require('./Action');
 import ActionType = require('./ActionType');
 import Location = require('./Location');
@@ -46,6 +52,11 @@ type AppSyncEvent = {
     endUserId: string,
     endUserToken: string,
     endUser: EndUser,
+    endUserInfo: EndUserInfo,
+    endUserInfoToken: string,
+    endUserInfoId: string,
+    groupId: string,
+    group: Group
     actionId: string,
     action: Action,
     actionTypeId: string,
@@ -59,6 +70,7 @@ type AppSyncEvent = {
     itemTypeId: string,
     actionId: string,
     itemId: string,
+    groupId: string,
     endUserId: string,
     locationId: string,
     actionTypeId: string
@@ -131,6 +143,16 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
         return await verifyEndUserEmailConfirm(event.arguments.endUserToken);
       case "deleteEndUser":
         return await deleteOne(event.arguments.endUserId, event.identity.cognitoIdentityId);
+      case 'inviteEndUserRequest':
+        return await endUserInviteRequestEmail(event.arguments.endUserInfo, event.identity.cognitoIdentityId);
+      case 'inviteEndUserConfirm':
+        return await endUserInviteConfirmEmail(event.arguments.endUserInfoToken);
+      case 'endUserInfos':
+        return await listAtGroup('EndUserInfo', event.source.id) || [];
+      case "deleteEndUserInfo":
+        return await deleteOne(event.arguments.endUserInfoId, event.identity.cognitoIdentityId);
+      case "group":
+        return await getOneById(sliceStringFrom(event.source.endUserId, 'group:'), event.identity.cognitoIdentityId);
       case "listActions":
         return await list('Action', event.identity.cognitoIdentityId);
       case "clientListActionsFuture":
@@ -173,6 +195,16 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
         return await updateOne(event.arguments.location, event.identity.cognitoIdentityId);
       case "deleteLocation":
         return await deleteOne(event.arguments.locationId, event.identity.cognitoIdentityId);
+      case "listGroups":
+        return await list('Group', event.identity.cognitoIdentityId);
+      case "getGroupById":
+        return await getOneById(event.arguments.groupId, event.identity.cognitoIdentityId);
+      case "createGroup":
+        return await createGroup(event.arguments.group, event.identity.cognitoIdentityId);
+      case "updateGroup":
+        return await updateOne(event.arguments.group, event.identity.cognitoIdentityId);
+      case "deleteGroup":
+        return await deleteOne(event.arguments.groupId, event.identity.cognitoIdentityId);
       default:
         return null;
     }
