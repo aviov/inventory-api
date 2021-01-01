@@ -17,7 +17,7 @@ async function endUserInviteRequestEmail(endUserInfo: EndUserInfo, userId: strin
     inviteInfo: inviteInfoJSON
   };
   const token = jwt.sign(payload, jwtSecret, { expiresIn: jwtExpiresIn });
-  const link = 'http://localhost:3000/inviteEmail?token=' + token; // 'https://keepserv.io/inviteEmail?token=' + token; //
+  const link = 'https://keepserv.io/inviteEmail?token=' + token; // 'http://localhost:3000/inviteEmail?token=' + token; //
   const bodyHtml = endUserInviteRequestEmailHtml(inviteInfo, link);
   const bodyText = 'Confirm to join the group at keepserv';
   const subject = 'Keepserv: confirmation to join the group';
