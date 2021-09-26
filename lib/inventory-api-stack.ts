@@ -226,6 +226,11 @@ export class InventoryApiStack extends cdk.Stack {
     
     lambdaDs.createResolver({
       typeName: "Query",
+      fieldName: "getEndUserAccount"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
       fieldName: "getEndUserById"
     });
     

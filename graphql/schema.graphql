@@ -111,6 +111,44 @@ input EndUserInfoInputUpdate {
 }
 
 
+# Person is created for user profile information and to interact with other persons
+type Person {
+  id: ID! # person:123
+  dateCreatedAt: String
+  dateModifiedAt: String
+  name: String!
+  email: String
+  emailVerified: String
+  phone: String
+  inviteInfo: String
+  requestInfo: String
+  confirmInfo: String
+}
+
+input PersonInput {
+  id: ID! # person:123
+  dateCreatedAt: String
+  name: String
+  email: String # unique email
+  emailVerified: String
+  phone: String
+  inviteInfo: String
+  requestInfo: String
+  confirmInfo: String
+}
+
+input PersonInputUpdate {
+  id: ID! # person:123
+  dateModifiedAt: String
+  name: String
+  email: String
+  phone: String
+  inviteInfo: String
+  requestInfo: String
+  confirmInfo: String
+}
+
+
 type Group {
   id: ID!
   dateCreatedAt: String
@@ -312,10 +350,13 @@ type Query @aws_iam @aws_api_key {
   listItems: [Item]
   getItemTypeById(itemTypeId: String!): ItemType
   listItemTypes: [ItemType]
+  getEndUserAccount: EndUser
   getEndUserById(endUserId: String!): EndUser
   listEndUsers: [EndUser]
   getEndUserInfoById(endUserInfoId: String!): EndUserInfo
   listEndUserInfos: [EndUserInfo]
+  getPersonById(personId: String!): Person
+  listPersons: [Person]
   getGroupById(groupId: String!): Group
   listGroups: [Group]
   getActionById(actionId: String!): Action
@@ -347,6 +388,9 @@ type Mutation {
   inviteEndUserConfirm(endUserInfoToken: String!): String
   @aws_iam @aws_api_key
   deleteEndUserInfo(endUserInfoId: String!): String
+  createPerson(person: PersonInput!): Person
+  updatePerson(person: PersonInputUpdate!): Person
+  deletePerson(personId: String!): String
   createGroup(group: GroupInput!): Group
   updateGroup(group: GroupInputUpdate!): Group
   deleteGroup(groupId: String!): String
