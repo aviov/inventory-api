@@ -10,6 +10,7 @@ import getItemTypeById from './getItemTypeById';
 import listById from './listById';
 import listItemTypes from './listItemTypes';
 import updateItemType from './updateItemType';
+import getEndUserAccount from './getEndUserAccount';
 import createEndUser from './createEndUser';
 import verifyEndUserEmailRequest from './verifyEndUserEmailRequest';
 import verifyEndUserEmailConfirm from './verifyEndUserEmailConfirm';
@@ -133,6 +134,8 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
         return await list('EndUser', event.identity.cognitoIdentityId);
       case "getEndUserById":
         return await getOneById(event.arguments.endUserId, event.identity.cognitoIdentityId);
+      case "getEndUserAccount":
+        return await getEndUserAccount('enduser:account:', event.identity.cognitoIdentityId);
       case "createEndUser":
         return await createEndUser(event.arguments.endUser, event.identity.cognitoIdentityId);
       case "updateEndUser":
