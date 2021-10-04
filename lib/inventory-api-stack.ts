@@ -336,6 +336,11 @@ export class InventoryApiStack extends cdk.Stack {
 
     lambdaDs.createResolver({
       typeName: 'Action',
+      fieldName: 'item'
+    });
+
+    lambdaDs.createResolver({
+      typeName: 'Action',
       fieldName: 'endUser'
     });
 
