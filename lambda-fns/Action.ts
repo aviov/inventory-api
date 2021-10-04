@@ -1,5 +1,7 @@
 interface Action {
   id: string;
+  name: string
+  description: string
   dateCreatedAt: string
   itemId: string
   endUserId: string

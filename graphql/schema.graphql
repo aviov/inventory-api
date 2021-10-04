@@ -227,6 +227,8 @@ type ActionTypeFuture @aws_iam @aws_api_key {
 
 type ActionFuture @aws_iam @aws_api_key {
   id: ID!
+  name: String
+  description: String
   userId: String
   dateCreatedAt: String
   item: ItemFuture
@@ -245,6 +247,8 @@ type ActionFuture @aws_iam @aws_api_key {
 
 type Action {
   id: ID!
+  name: String
+  description: String
   dateCreatedAt: String
   item: Item
   endUser: EndUser
@@ -257,6 +261,8 @@ type Action {
 
 input ActionInput {
   id: ID!
+  name: String
+  description: String
   dateCreatedAt: String!
   itemId: String!
   endUserId: String!
@@ -269,6 +275,8 @@ input ActionInput {
 
 input ActionInputUpdate {
   id: ID!
+  name: String
+  description: String
   dateCreatedAt: String
   itemId: String
   endUserId: String
