@@ -32,12 +32,27 @@ export class InventoryApiStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'AttachmentsBucketName', {
       value: bucket.bucketName
     });
+
+    // auth tenant pre token generation lambda
+    const authTenant = new lambda.Function(this, 'authTenant', {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      handler: 'auth-tenant.handler',
+      code: lambda.Code.fromAsset('lambda-fns')
+    });
     
     // user pool
     const userPool = new cognito.UserPool(this, 'UserPoolAtInventory', {
       selfSignUpEnabled: true,
       autoVerify: { email: true },
-      signInAliases: { email: true }
+      signInAliases: { email: true },
+      lambdaTriggers: {
+        preTokenGeneration: authTenant
+      },
+      customAttributes: {
+        'tenantId': new cognito.StringAttribute({ minLen: 1, maxLen: 256, mutable: false }),
+        'roleId': new cognito.StringAttribute({ minLen: 1, maxLen: 256, mutable: false }),
+        'tierId': new cognito.StringAttribute({ minLen: 1, maxLen: 256, mutable: false })
+      }
     });
 
     // user pool client
@@ -156,6 +171,26 @@ export class InventoryApiStack extends cdk.Stack {
 
     lambdaDs.createResolver({
       typeName: "Query",
+      fieldName: "getTenantById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listTenants"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getOrgById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listOrgs"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Query",
       fieldName: "getItemById"
     });
 
@@ -177,6 +212,36 @@ export class InventoryApiStack extends cdk.Stack {
     lambdaDs.createResolver({
       typeName: "Query",
       fieldName: "getItemTypeById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createTenant"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteTenant"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateTenant"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createOrg"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteOrg"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateOrg"
     });
     
     lambdaDs.createResolver({
@@ -527,6 +592,12 @@ export class InventoryApiStack extends cdk.Stack {
 
     // env variable for ddb table
     inventoryLambda.addEnvironment('INVENTORY_TABLE', inventoryTable.tableName);
+
+    // ddb table access from lambda
+    inventoryTable.grantFullAccess(authTenant);
+    
+    // env variable for ddb table
+    authTenant.addEnvironment('INVENTORY_TABLE', inventoryTable.tableName);
 
     // permission for items lambda to send emails
     inventoryLambda.addToRolePolicy(

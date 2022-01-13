@@ -1,3 +1,5 @@
+import createTenant from './createTenant';
+import createOrg from './createOrg';
 import createItem from './createItem';
 import deleteItem from './deleteItem';
 import getItemById from './getItemById';
@@ -27,6 +29,8 @@ import clientListActionsFuture from './clientListActionsFuture';
 import createActionType from './createActionType';
 import createLocation from './createLocation';
 import createGroup from './createGroup';
+import Tenant = require('./Tenant');
+import Org = require('./Org');
 import Item = require('./Item');
 import ItemType = require('./ItemType');
 import EndUser = require('./EndUser');
@@ -36,8 +40,10 @@ import Action = require('./Action');
 import ActionType = require('./ActionType');
 import Location = require('./Location');
 import {
+  getCognitoSignIn,
   sliceStringFrom
 } from './util-fns';
+import { OrganizationPrincipal } from '@aws-cdk/aws-iam';
 
 type AppSyncEvent = {
   info: {
@@ -45,6 +51,11 @@ type AppSyncEvent = {
     parentTypeName: string
   },
   arguments: {
+    prefix: string,
+    tenant: Tenant,
+    tenantId: string,
+    org: Org,
+    orgId: string
     itemId: string,
     serialNumber: string,
     item: Item,
@@ -77,13 +88,19 @@ type AppSyncEvent = {
     actionTypeId: string
   },
   identity: {
+    cognitoIdentityAuthProvider: string
     cognitoIdentityId: string
   },
+  request: {
+    headers: {
+      tenant: string
+    }
+  }
   'detail-type': string
 };
 
 exports.handler = async (event: AppSyncEvent, context: object) => {
-  // console.log('event', event, '');
+  // console.log('\n event', event);
   if (event['detail-type'] && event['detail-type'] === 'Scheduled Event') {
     const emailResults = await clientShceduledEmails(event, context);
     // console.log('emailResult', emailResults);
@@ -103,111 +120,156 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
           return null;
       }
     }
+
+    if (event.info && event.info.fieldName === 'verifyEndUserEmailConfirm') {
+      return await verifyEndUserEmailConfirm(event.arguments.endUserToken);
+    }
+
+    if (event.info && event.info.fieldName === 'inviteEndUserConfirm') {
+      return await endUserInviteConfirmEmail(event.arguments.endUserInfoToken);
+    }
+
+    if (event.info && event.info.fieldName === 'clientListActionsFuture') {
+      return await clientListActionsFuture();
+    }
+
+    const cognitoSignIn = getCognitoSignIn(event.identity.cognitoIdentityAuthProvider);
+    const cognitoIdentity = event.identity.cognitoIdentityId;
+    const tenant = event.request.headers.tenant;
+    const userId = (tenant && tenant !== 'null') ? tenant : cognitoIdentity
+
+    // console.log(
+    //   '\n cognitoSignIn:', cognitoSignIn,
+    //   '\n cognitoIdentity:', cognitoIdentity,
+    //   '\n tenant:', tenant,
+    //   '\n userId:', userId
+    // );
+    
     switch (event.info.fieldName) {
+      case "listTenants":
+        return await list('Tenant', cognitoSignIn);
+      case "getTenantById":
+        return await getOneById(event.arguments.tenantId, cognitoSignIn);
+      case "createTenant":
+        return await createTenant(event.arguments.tenant, cognitoSignIn);
+      case "updateTenant":
+        return await updateOne(event.arguments.tenant, cognitoSignIn);
+      case "deleteTenant":
+        return await deleteOne(event.arguments.tenantId, cognitoSignIn);
+      case "listOrgs":
+        return await list('Org', userId, event.arguments.prefix);
+      case "getOrgById":
+        return await getOneById(event.arguments.orgId, userId);
+      case "createOrg":
+        return await createOrg(event.arguments.org, userId);
+      case "updateOrg":
+        return await updateOne(event.arguments.org, userId);
+      case "deleteOrg":
+        return await deleteOne(event.arguments.orgId, userId);
       case "getItemById":
-        return await getItemById(event.arguments.itemId, event.identity.cognitoIdentityId);
+        return await getItemById(event.arguments.itemId, userId);
       case "getItemBySerialNumber":
-        return await getItemBySerialNumber(event.arguments.serialNumber, event.identity.cognitoIdentityId);
+        return await getItemBySerialNumber(event.arguments.serialNumber, userId);
       case "createItem":
-        return await createItem(event.arguments.item, event.identity.cognitoIdentityId);
+        return await createItem(event.arguments.item, userId);
       case "listItems":
-        return await listItems(event.identity.cognitoIdentityId);
+        return await listItems(userId);
       case "deleteItem":
-        return await deleteItem(event.arguments.itemId, event.identity.cognitoIdentityId);
+        return await deleteItem(event.arguments.itemId, userId);
       case "updateItem":
-        return await updateItem(event.arguments.item, event.identity.cognitoIdentityId);
+        return await updateItem(event.arguments.item, userId);
       case "getItemTypeById":
-        return await getItemTypeById(event.arguments.itemTypeId, event.identity.cognitoIdentityId);
+        return await getItemTypeById(event.arguments.itemTypeId, userId);
       case "createItemType":
-        return await createItemType(event.arguments.itemType, event.identity.cognitoIdentityId);
+        return await createItemType(event.arguments.itemType, userId);
       case "listItemTypes":
-        return await listItemTypes(event.identity.cognitoIdentityId);
+        return await listItemTypes(userId);
       case "deleteItemType":
-        return await deleteItemType(event.arguments.itemTypeId, event.identity.cognitoIdentityId);
+        return await deleteItemType(event.arguments.itemTypeId, userId);
       case "updateItemType":
-        return await updateItemType(event.arguments.itemType, event.identity.cognitoIdentityId);
+        return await updateItemType(event.arguments.itemType, userId);
       case "itemType":
-        return await getOneById(sliceStringFrom(event.source.itemTypeId, 'itemtype:'), event.identity.cognitoIdentityId);
+        return await getOneById(sliceStringFrom(event.source.itemTypeId, 'itemtype:'), userId);
       case "actions":
-        return await listById(('action:' + event.source.id), event.identity.cognitoIdentityId);
+        return await listById(('action:' + event.source.id), userId);
       case "listEndUsers":
-        return await list('EndUser', event.identity.cognitoIdentityId);
+        return await list('EndUser', userId, event.arguments.prefix);
       case "getEndUserById":
-        return await getOneById(event.arguments.endUserId, event.identity.cognitoIdentityId);
+        return await getOneById(event.arguments.endUserId, userId);
       case "getEndUserAccount":
-        return await getEndUserAccount('enduser:account:', event.identity.cognitoIdentityId);
+        return await getEndUserAccount('enduser:account:', userId);
       case "createEndUser":
-        return await createEndUser(event.arguments.endUser, event.identity.cognitoIdentityId);
+        return await createEndUser(event.arguments.endUser, userId);
       case "updateEndUser":
-        return await updateOne(event.arguments.endUser, event.identity.cognitoIdentityId);
+        return await updateOne(event.arguments.endUser, userId);
       case 'verifyEndUserEmailRequest':
-        return await verifyEndUserEmailRequest(event.arguments.endUser, event.identity.cognitoIdentityId)
-      case 'verifyEndUserEmailConfirm':
-        return await verifyEndUserEmailConfirm(event.arguments.endUserToken);
+        return await verifyEndUserEmailRequest(event.arguments.endUser, userId)
+      // case 'verifyEndUserEmailConfirm':
+      //   return await verifyEndUserEmailConfirm(event.arguments.endUserToken);
       case "deleteEndUser":
-        return await deleteOne(event.arguments.endUserId, event.identity.cognitoIdentityId);
+        return await deleteOne(event.arguments.endUserId, userId);
       case 'inviteEndUserRequest':
-        return await endUserInviteRequestEmail(event.arguments.endUserInfo, event.identity.cognitoIdentityId);
-      case 'inviteEndUserConfirm':
-        return await endUserInviteConfirmEmail(event.arguments.endUserInfoToken);
+        return await endUserInviteRequestEmail(event.arguments.endUserInfo, userId);
+      // case 'inviteEndUserConfirm':
+      //   return await endUserInviteConfirmEmail(event.arguments.endUserInfoToken);
       case 'endUserInfos':
         return await listAtGroup('EndUserInfo', event.source.id) || [];
       case "deleteEndUserInfo":
-        return await deleteOne(event.arguments.endUserInfoId, event.identity.cognitoIdentityId);
+        return await deleteOne(event.arguments.endUserInfoId, userId);
       case "group":
-        return await getOneById(sliceStringFrom(event.source.endUserId, 'group:'), event.identity.cognitoIdentityId);
+        return await getOneById(sliceStringFrom(event.source.endUserId, 'group:'), userId);
       case "listActions":
-        return await list('Action', event.identity.cognitoIdentityId);
-      case "clientListActionsFuture":
-        return await clientListActionsFuture();
+        return await list('Action', userId);
+      // case "clientListActionsFuture":
+      //   return await clientListActionsFuture();
       // case "actionFuture":
       //   return await getOneById(sliceStringFrom(event.source.id, 'action:'), event.source.userId);
       case "getActionById":
-        return await getOneById(event.arguments.actionId, event.identity.cognitoIdentityId);
+        return await getOneById(event.arguments.actionId, userId);
       case "createAction":
-        return await createAction(event.arguments.action, event.identity.cognitoIdentityId);
+        return await createAction(event.arguments.action, userId);
       case "updateAction":
-        return await updateOne(event.arguments.action, event.identity.cognitoIdentityId);
+        return await updateOne(event.arguments.action, userId);
       case "deleteAction":
-        return await deleteOne(event.arguments.actionId, event.identity.cognitoIdentityId);
+        return await deleteOne(event.arguments.actionId, userId);
       case "item":
-        return await getOneById(sliceStringFrom(event.source.itemId, 'item:'), event.identity.cognitoIdentityId);
+        return await getOneById(sliceStringFrom(event.source.itemId, 'item:'), userId);
       case "endUser":
-        return await getOneById(sliceStringFrom(event.source.endUserId, 'enduser:'), event.identity.cognitoIdentityId);
+        return await getOneById(sliceStringFrom(event.source.endUserId, 'enduser:'), userId);
       case "location":
-        return await getOneById(sliceStringFrom(event.source.locationId, 'location:'), event.identity.cognitoIdentityId);
+        return await getOneById(sliceStringFrom(event.source.locationId, 'location:'), userId);
       case "actionType":
-        return await getOneById(sliceStringFrom(event.source.actionTypeId, 'actiontype:'), event.identity.cognitoIdentityId);
+        return await getOneById(sliceStringFrom(event.source.actionTypeId, 'actiontype:'), userId);
       case "listActionTypes":
-        return await list('ActionType', event.identity.cognitoIdentityId);
+        return await list('ActionType', userId);
       case "getActionTypeById":
-        return await getOneById(event.arguments.actionTypeId, event.identity.cognitoIdentityId);
+        return await getOneById(event.arguments.actionTypeId, userId);
       case "createActionType":
-        return await createActionType(event.arguments.actionType, event.identity.cognitoIdentityId);
+        return await createActionType(event.arguments.actionType, userId);
       case "updateActionType":
-        return await updateOne(event.arguments.actionType, event.identity.cognitoIdentityId);
+        return await updateOne(event.arguments.actionType, userId);
       case "deleteActionType":
-        return await deleteOne(event.arguments.actionTypeId, event.identity.cognitoIdentityId);
+        return await deleteOne(event.arguments.actionTypeId, userId);
       case "listLocations":
-        return await list('Location', event.identity.cognitoIdentityId);
+        return await list('Location', userId);
       case "getLocationById":
-        return await getOneById(event.arguments.locationId, event.identity.cognitoIdentityId);
+        return await getOneById(event.arguments.locationId, userId);
       case "createLocation":
-        return await createLocation(event.arguments.location, event.identity.cognitoIdentityId);
+        return await createLocation(event.arguments.location, userId);
       case "updateLocation":
-        return await updateOne(event.arguments.location, event.identity.cognitoIdentityId);
+        return await updateOne(event.arguments.location, userId);
       case "deleteLocation":
-        return await deleteOne(event.arguments.locationId, event.identity.cognitoIdentityId);
+        return await deleteOne(event.arguments.locationId, userId);
       case "listGroups":
-        return await list('Group', event.identity.cognitoIdentityId);
+        return await list('Group', userId);
       case "getGroupById":
-        return await getOneById(event.arguments.groupId, event.identity.cognitoIdentityId);
+        return await getOneById(event.arguments.groupId, userId);
       case "createGroup":
-        return await createGroup(event.arguments.group, event.identity.cognitoIdentityId);
+        return await createGroup(event.arguments.group, userId);
       case "updateGroup":
-        return await updateOne(event.arguments.group, event.identity.cognitoIdentityId);
+        return await updateOne(event.arguments.group, userId);
       case "deleteGroup":
-        return await deleteOne(event.arguments.groupId, event.identity.cognitoIdentityId);
+        return await deleteOne(event.arguments.groupId, userId);
       default:
         return null;
     }

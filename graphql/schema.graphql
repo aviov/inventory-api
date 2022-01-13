@@ -1,3 +1,70 @@
+type Tenant {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  dateTenantLogIn: String
+  dateTenantLogOut: String
+  state: String
+}
+
+input TenantInput {
+  id: ID!
+  dateCreatedAt: String!
+  name: String!
+  isConfirmed: Boolean
+}
+
+input TenantInputUpdate {
+  id: ID!
+  name: String
+  dateTenantLogIn: String
+  dateTenantLogOut: String
+  state: String
+}
+
+
+type Org {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  regNr: String
+  email: String
+  phone: String
+  webPage: String
+  country: String
+  city: String
+  street: String
+  address: String
+}
+
+input OrgInput {
+  id: ID!
+  dateCreatedAt: String!
+  name: String!
+  regNr: String
+  email: String
+  phone: String
+  webPage: String
+  country: String
+  city: String
+  street: String
+  address: String
+}
+
+input OrgInputUpdate {
+  id: ID!
+  name: String
+  regNr: String
+  email: String
+  phone: String
+  webPage: String
+  country: String
+  city: String
+  street: String
+  address: String
+}
+
+
 type Item {
   id: ID!
   dateCreatedAt: String
@@ -353,6 +420,10 @@ input LocationInputUpdate {
 
 
 type Query @aws_iam @aws_api_key {
+  getTenantById(tenantId: String!): Tenant
+  listTenants: [Tenant]
+  getOrgById(orgId: String!): Org
+  listOrgs(prefix: String): [Org]
   getItemById(itemId: String!): Item
   getItemBySerialNumber(serialNumber: String!): Item
   listItems: [Item]
@@ -360,7 +431,7 @@ type Query @aws_iam @aws_api_key {
   listItemTypes: [ItemType]
   getEndUserAccount: EndUser
   getEndUserById(endUserId: String!): EndUser
-  listEndUsers: [EndUser]
+  listEndUsers(prefix: String): [EndUser]
   getEndUserInfoById(endUserInfoId: String!): EndUserInfo
   listEndUserInfos: [EndUserInfo]
   getPersonById(personId: String!): Person
@@ -378,6 +449,12 @@ type Query @aws_iam @aws_api_key {
 }
 
 type Mutation {
+  createTenant(tenant: TenantInput!): Tenant
+  updateTenant(tenant: TenantInputUpdate!): Tenant
+  deleteTenant(tenantId: String!): String
+  createOrg(org: OrgInput!): Org
+  updateOrg(org: OrgInputUpdate!): Org
+  deleteOrg(orgId: String!): String
   createItem(item: ItemInput!): Item
   updateItem(item: ItemInputUpdate!): Item
   deleteItem(itemId: String!): String
