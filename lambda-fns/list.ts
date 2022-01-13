@@ -1,12 +1,12 @@
 const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-async function list(entityType: String, userId: String) {
+async function list(entityType: String, userId: String, prefix?: string) {
     const params = {
       TableName: process.env.INVENTORY_TABLE,
       ExpressionAttributeValues: {
         ":v1": userId,
-        ":v2": entityType.toLowerCase() + ':'
+        ":v2": (prefix ? prefix : '') + entityType.toLowerCase() + ':'
       },
       ExpressionAttributeNames: {
         "#userId": "userId",
