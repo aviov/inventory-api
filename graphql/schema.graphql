@@ -23,6 +23,42 @@ input TenantInputUpdate {
 }
 
 
+type TenantUser {
+  id: ID!
+  dateCreatedAt: String
+  name: String
+  nameTwo: String
+  emailVerified: String
+  inviteInfo: String
+  dateTenantLogIn: String
+  dateTenantLogOut: String
+  state: String
+  access: String
+}
+
+input TenantUserInput {
+  id: ID!
+  dateCreatedAt: String!
+  name: String!
+  nameTwo: String
+  emailVerified: String
+  inviteInfo: String
+  access: String
+}
+
+input TenantUserInputUpdate {
+  id: ID!
+  name: String
+  nameTwo: String
+  emailVerified: String
+  inviteInfo: String
+  dateTenantLogIn: String
+  dateTenantLogOut: String
+  state: String
+  access: String
+}
+
+
 type Org {
   id: ID!
   dateCreatedAt: String
@@ -421,7 +457,10 @@ input LocationInputUpdate {
 
 type Query @aws_iam @aws_api_key {
   getTenantById(tenantId: String!): Tenant
-  listTenants: [Tenant]
+  getTenantUser(refId: String!, tenantUserId: String!): TenantUser
+  listTenants(prefix: String): [Tenant]
+  listTenantsNotOwn(prefix: String, refId: String): [TenantUser]
+  listTenantUsers: [TenantUser]
   getOrgById(orgId: String!): Org
   listOrgs(prefix: String): [Org]
   getItemById(itemId: String!): Item
@@ -452,6 +491,11 @@ type Mutation {
   createTenant(tenant: TenantInput!): Tenant
   updateTenant(tenant: TenantInputUpdate!): Tenant
   deleteTenant(tenantId: String!): String
+  inviteTenantUserRequest(tenantUser: TenantUserInput!): TenantUser
+  inviteTenantUserAccept(tenantUser: TenantUserInputUpdate!): TenantUser
+  # tenantUserInviteAcceptToken(tenantUserToken: String!): String
+  updateTenantUser(tenantUser: TenantUserInputUpdate!): TenantUser
+  deleteTenantUser(tenantUserId: String!): String
   createOrg(org: OrgInput!): Org
   updateOrg(org: OrgInputUpdate!): Org
   deleteOrg(orgId: String!): String

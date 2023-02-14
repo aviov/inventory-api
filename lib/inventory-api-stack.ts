@@ -181,6 +181,21 @@ export class InventoryApiStack extends cdk.Stack {
 
     lambdaDs.createResolver({
       typeName: "Query",
+      fieldName: "getTenantUser"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listTenantsNotOwn"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listTenantUsers"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Query",
       fieldName: "getOrgById"
     });
     
@@ -318,6 +333,32 @@ export class InventoryApiStack extends cdk.Stack {
       typeName: "Mutation",
       fieldName: 'verifyEndUserEmailConfirm'
     });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateTenantUser"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteTenantUser"
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: 'inviteTenantUserRequest'
+    });
+
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: 'inviteTenantUserAccept'
+    });
+    
+    // unused yet
+    // lambdaDs.createResolver({
+    //   typeName: "Mutation",
+    //   fieldName: 'tenantUserInviteAcceptToken'
+    // });
     
     lambdaDs.createResolver({
       typeName: "Mutation",
@@ -531,6 +572,19 @@ export class InventoryApiStack extends cdk.Stack {
       },
       sortKey: {
         name: 'itemId',
+        type: ddb.AttributeType.STRING
+      }
+    });
+
+    // ddb GSI to query by refId (PK2, SK1)
+    inventoryTable.addGlobalSecondaryIndex({
+      indexName: 'refIdIndex',
+      partitionKey: {
+        name: 'refId',
+        type: ddb.AttributeType.STRING
+      },
+      sortKey: {
+        name: 'id',
         type: ddb.AttributeType.STRING
       }
     });
