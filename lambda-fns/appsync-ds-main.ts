@@ -16,12 +16,18 @@ import getEndUserAccount from './getEndUserAccount';
 import createEndUser from './createEndUser';
 import verifyEndUserEmailRequest from './verifyEndUserEmailRequest';
 import verifyEndUserEmailConfirm from './verifyEndUserEmailConfirm';
+import tenantUserInviteRequest from './tenantUserInviteRequest';
+import tenantUserInviteAccept from './tenantUserInviteAccept';
+// import tenantUserInviteDecline from './tenantUserInviteDecline';
+import tenantUserInviteAcceptToken from './tenantUserInviteAcceptToken';
 import endUserInviteRequestEmail from './endUserInviteRequestEmail';
 import endUserInviteConfirmEmail from './endUserInviteConfirmEmail';
 import listAtGroup from './listAtGroup';
 import updateOne from './updateOne';
 import deleteOne from './deleteOne';
 import list from './list';
+import listOneByRefId from './listOneByRefId';
+import listByRefId from './listByRefId';
 import getOneById from './getOneById';
 import createAction from './createAction';
 import clientShceduledEmails from './clientScheduledEmails';
@@ -30,6 +36,7 @@ import createActionType from './createActionType';
 import createLocation from './createLocation';
 import createGroup from './createGroup';
 import Tenant = require('./Tenant');
+import TenantUser = require('./TenantUser');
 import Org = require('./Org');
 import Item = require('./Item');
 import ItemType = require('./ItemType');
@@ -54,6 +61,10 @@ type AppSyncEvent = {
     prefix: string,
     tenant: Tenant,
     tenantId: string,
+    refId: string,
+    tenantUserId: string,
+    tenantUser: TenantUser,
+    tenantUserToken: string,
     org: Org,
     orgId: string
     itemId: string,
@@ -156,6 +167,24 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
         return await updateOne(event.arguments.tenant, cognitoSignIn);
       case "deleteTenant":
         return await deleteOne(event.arguments.tenantId, cognitoSignIn);
+      case "listTenantUsers":
+        return await list('TenantUser', userId);
+      case "listTenantsNotOwn":
+        return await listByRefId('TenantUser', event.arguments.refId, event.arguments.prefix);
+      case "getTenantUser":
+        return await listOneByRefId(event.arguments.refId, event.arguments.tenantUserId);
+      case "updateTenantUser":
+        return await updateOne(event.arguments.tenantUser, sliceStringFrom(event.arguments.tenantUser.id, 'tenant:'));
+      case "deleteTenantUser":
+        return await deleteOne(event.arguments.tenantUserId, userId);
+      case 'inviteTenantUserRequest':
+        return await tenantUserInviteRequest(event.arguments.tenantUser, userId);
+      case 'inviteTenantUserAccept':
+        return await tenantUserInviteAccept(event.arguments.tenantUser);
+      // case 'inviteTenantUserDecline':
+        // return await tenantUserInviteDecline(event.arguments.tenantUser, userId);
+      case 'tenantUserInviteAcceptToken':
+        return await tenantUserInviteAcceptToken(event.arguments.tenantUserToken);
       case "listOrgs":
         return await list('Org', userId, event.arguments.prefix);
       case "getOrgById":
