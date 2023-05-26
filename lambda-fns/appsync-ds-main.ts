@@ -33,6 +33,8 @@ import createAction from './createAction';
 import clientShceduledEmails from './clientScheduledEmails';
 import clientListActionsFuture from './clientListActionsFuture';
 import createActionType from './createActionType';
+import createActionGang from './createActionGang';
+import createProject from './createProject';
 import createLocation from './createLocation';
 import createGroup from './createGroup';
 import Tenant = require('./Tenant');
@@ -45,6 +47,8 @@ import EndUserInfo = require('./EndUserInfo');
 import Group = require('./Group');
 import Action = require('./Action');
 import ActionType = require('./ActionType');
+import ActionGang = require('./ActionGang');
+import Project = require('./Project');
 import Location = require('./Location');
 import {
   getCognitoSignIn,
@@ -84,6 +88,10 @@ type AppSyncEvent = {
     action: Action,
     actionTypeId: string,
     actionType: ActionType,
+    actionGangId: string,
+    actionGang: ActionGang,
+    projectId: string,
+    project: Project,
     locationId: string,
     location: Location
   },
@@ -279,6 +287,29 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
         return await updateOne(event.arguments.actionType, userId);
       case "deleteActionType":
         return await deleteOne(event.arguments.actionTypeId, userId);
+
+      case "listActionGangs":
+        return await list('ActionGang', userId);
+      case "getActionGangById":
+        return await getOneById(event.arguments.actionGangId, userId);
+      case "createActionGang":
+        return await createActionGang(event.arguments.actionGang, userId);
+      case "updateActionGang":
+        return await updateOne(event.arguments.actionGang, userId);
+      case "deleteActionGang":
+        return await deleteOne(event.arguments.actionGangId, userId);
+
+      case "listProjects":
+        return await list('Project', userId);
+      case "getProjectById":
+        return await getOneById(event.arguments.projectId, userId);
+      case "createProject":
+        return await createProject(event.arguments.project, userId);
+      case "updateProject":
+        return await updateOne(event.arguments.project, userId);
+      case "deleteProject":
+        return await deleteOne(event.arguments.projectId, userId);
+      
       case "listLocations":
         return await list('Location', userId);
       case "getLocationById":

@@ -485,6 +485,59 @@ export class InventoryApiStack extends cdk.Stack {
       fieldName: "deleteActionType"
     });
     
+
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listActionGangs"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getActionGangById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createActionGang"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateActionGang"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteActionGang"
+    });
+    
+
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "listProjects"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Query",
+      fieldName: "getProjectById"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "createProject"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateProject"
+    });
+    
+    lambdaDs.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteProject"
+    });
+    
+
     lambdaDs.createResolver({
       typeName: "Query",
       fieldName: "listLocations"

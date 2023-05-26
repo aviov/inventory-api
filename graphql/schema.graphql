@@ -356,9 +356,18 @@ type Action {
   item: Item
   endUser: EndUser
   location: Location
+  valueUnitsA: String
+  valueEstimA: Float
+  valueActualA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  valueActualB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
   dateActionStart: String
   dateActionEnd: String
   actionType: ActionType
+  index: String
   attachments: String
 }
 
@@ -370,9 +379,18 @@ input ActionInput {
   itemId: String!
   endUserId: String!
   locationId: String!
+  valueUnitsA: String
+  valueEstimA: Float
+  valueActualA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  valueActualB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
   dateActionStart: String!
   dateActionEnd: String!
   actionTypeId: String
+  index: String
   attachments: String
 }
 
@@ -384,9 +402,18 @@ input ActionInputUpdate {
   itemId: String
   endUserId: String
   locationId: String
+  valueUnitsA: String
+  valueEstimA: Float
+  valueActualA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  valueActualB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
   dateActionStart: String
   dateActionEnd: String
   actionTypeId: String
+  index: String
   attachments: String
 }
 
@@ -413,6 +440,118 @@ input ActionTypeInputUpdate {
   name: String
   isVisibleLatest: Boolean
   isVisibleNext: Boolean
+}
+
+
+type ActionGang {
+  id: ID!
+  name: String
+  description: String
+  dateCreatedAt: String
+  valueUnitsA: String
+  valueEstimA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
+  dateActionStart: String
+  dateActionEnd: String
+  index: String
+  attachments: String
+  children: String
+}
+
+input ActionGangInput {
+  id: ID!
+  name: String
+  description: String
+  dateCreatedAt: String!
+  valueUnitsA: String
+  valueEstimA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
+  dateActionStart: String
+  dateActionEnd: String
+  index: String
+  attachments: String
+  children: String
+}
+
+input ActionGangInputUpdate {
+  id: ID!
+  name: String
+  description: String
+  valueUnitsA: String
+  valueEstimA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
+  dateActionStart: String
+  dateActionEnd: String
+  index: String
+  attachments: String
+  children: String
+}
+
+
+type Project {
+  id: ID!
+  name: String
+  serialNumber: String
+  description: String
+  dateCreatedAt: String
+  valueUnitsA: String
+  valueEstimA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
+  dateActionStart: String
+  dateActionEnd: String
+  index: String
+  attachments: String
+  children: String
+}
+
+input ProjectInput {
+  id: ID!
+  name: String
+  serialNumber: String
+  description: String
+  dateCreatedAt: String
+  valueUnitsA: String
+  valueEstimA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
+  dateActionStart: String
+  dateActionEnd: String
+  index: String
+  attachments: String
+  children: String
+}
+
+input ProjectInputUpdate {
+  id: ID!
+  name: String
+  serialNumber: String
+  description: String
+  dateCreatedAt: String
+  valueUnitsA: String
+  valueEstimA: Float
+  valueUnitsB: String
+  valueEstimB: Float
+  dateEstimStart: String
+  dateEstimEnd: String
+  dateActionStart: String
+  dateActionEnd: String
+  index: String
+  attachments: String
+  children: String
 }
 
 
@@ -483,6 +622,10 @@ type Query @aws_iam @aws_api_key {
   @aws_iam @aws_api_key
   getActionTypeById(actionTypeId: String!): ActionType
   listActionTypes: [ActionType]
+  getActionGangById(actionGangId: String!): ActionGang
+  listActionGangs: [ActionGang]
+  getProjectById(projectId: String!): Project
+  listProjects: [Project]
   getLocationById(locationId: String!): Location
   listLocations: [Location]
 }
@@ -529,6 +672,12 @@ type Mutation {
   createActionType(actionType: ActionTypeInput!): ActionType
   updateActionType(actionType: ActionTypeInputUpdate!): ActionType
   deleteActionType(actionTypeId: String!): String
+  createActionGang(actionGang: ActionGangInput!): ActionGang
+  updateActionGang(actionGang: ActionGangInputUpdate!): ActionGang
+  deleteActionGang(actionGangId: String!): String
+  createProject(project: ProjectInput!): Project
+  updateProject(project: ProjectInputUpdate!): Project
+  deleteProject(projectId: String!): String
   createLocation(location: LocationInput!): Location
   updateLocation(location: LocationInputUpdate!): Location
   deleteLocation(locationId: String!): String
