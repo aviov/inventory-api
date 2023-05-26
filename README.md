@@ -1,8 +1,16 @@
-# Welcome to your CDK TypeScript project!
+# inventory-api
+# AWS CDK TypeScript
 
-This is a blank project for TypeScript development with CDK.
+First commit evolved from previous projects:
+* items-api
+* solution-api
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+Stack and project structure inspired by examples from:
+* serverless-stack
+* AppSync
+* Amplify
+
+The `cdk.json` file tells the CDK Toolkit how to execute the app.
 
 ## Useful commands
 
