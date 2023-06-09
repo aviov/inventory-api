@@ -617,13 +617,13 @@ type Query @aws_iam @aws_api_key {
   getGroupById(groupId: String!): Group
   listGroups: [Group]
   getActionById(actionId: String!): Action
-  listActions: [Action]
+  listActions(prefix: String): [Action]
   clientListActionsFuture: [ActionFuture]
   @aws_iam @aws_api_key
   getActionTypeById(actionTypeId: String!): ActionType
   listActionTypes: [ActionType]
   getActionGangById(actionGangId: String!): ActionGang
-  listActionGangs: [ActionGang]
+  listActionGangs(prefix: String): [ActionGang]
   getProjectById(projectId: String!): Project
   listProjects: [Project]
   getLocationById(locationId: String!): Location

@@ -256,7 +256,7 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
       case "group":
         return await getOneById(sliceStringFrom(event.source.endUserId, 'group:'), userId);
       case "listActions":
-        return await list('Action', userId);
+        return await list('Action', userId, event.arguments.prefix);
       // case "clientListActionsFuture":
       //   return await clientListActionsFuture();
       // case "actionFuture":
@@ -289,7 +289,7 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
         return await deleteOne(event.arguments.actionTypeId, userId);
 
       case "listActionGangs":
-        return await list('ActionGang', userId);
+        return await list('ActionGang', userId, event.arguments.prefix);
       case "getActionGangById":
         return await getOneById(event.arguments.actionGangId, userId);
       case "createActionGang":
