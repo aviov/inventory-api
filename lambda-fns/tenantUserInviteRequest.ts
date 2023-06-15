@@ -36,11 +36,6 @@ async function tenantUserInviteRequest(tenantUser: TenantUser, userId: string) {
       bodyText,
       subject
     );
-    // console.log(
-    //   'token', token,
-    //   'bodyHtml', bodyHtml,
-    //   'result', JSON.stringify(result)
-    // );
     return tenantUser;
   } else {
     return null

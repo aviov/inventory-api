@@ -20,11 +20,6 @@ async function verifyEndUserEmailRequest(endUser: EndUser, userId: string) {
   const { emailVerified } = await updateOne({ id: endUser.id, emailVerified: '' }, userId);
   if (emailVerified === '') {
     const result = await verifySendEmail(endUser.email, bodyHtml);
-    // console.log(
-    //   'token', token,
-    //   'bodyHtml', bodyHtml,
-    //   'result', JSON.stringify(result)
-    // );
     return JSON.stringify(result);
   } else {
     return null

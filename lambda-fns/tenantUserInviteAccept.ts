@@ -19,12 +19,6 @@ async function tenantUserInviteAccept(one: any) {
     ...one,
     refId
   };
-  console.log(
-    'userId', userId,
-    'refId', refId,
-    'one', one,
-    'oneNew', oneNew,
-  );
   let params : Params = {
     TableName: process.env.INVENTORY_TABLE,
     Key: {
@@ -47,11 +41,9 @@ async function tenantUserInviteAccept(one: any) {
       prefix = ", ";
     }
  }
-  console.log('params: ', params)
   try {
     const { Attributes: One } = await docClient.update(params).promise();
     const { userId, ...rest } = One;
-    // console.log('rest', rest);
     return rest;
   } catch (err) {
     console.log('DynamoDB error: ', err)

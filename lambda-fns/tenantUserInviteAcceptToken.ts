@@ -6,7 +6,6 @@ import updateOne from './updateOne';
 async function tenantUserInviteConfirm(tenantUserToken: string) {
   try {
     const decoded = jwt.verify(tenantUserToken, jwtSecret);
-    // console.log(decoded);
     const decodedJSON = JSON.stringify(decoded);
     const decodedObject = JSON.parse(decodedJSON);
     const dateAccept = new Date().toISOString();

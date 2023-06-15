@@ -19,7 +19,6 @@ const apiKey = process.env.APPSYNC_API_KEY;
 let graphQLAppSyncClient: typeof AWSAppSyncClient;
 
 function initializeClient() {
-  // console.log('credentials', credentials);
   graphQLAppSyncClient = new AWSAppSyncClient({
     url: appsyncUrl,
     region,

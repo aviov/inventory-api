@@ -10,7 +10,6 @@ import updateOne from './updateOne';
 async function verifyEndUserEmailConfirm(endUserToken: string) {
   try {
     const decoded = jwt.verify(endUserToken, jwtSecret);
-    // console.log(decoded);
     const decodedJSON = JSON.stringify(decoded);
     const decodedObject = JSON.parse(decodedJSON);
     const {
