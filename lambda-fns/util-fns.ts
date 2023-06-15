@@ -4,9 +4,7 @@ export const sliceStringFrom = (str: string, start: string) =>
   str;
 
 export const getCognitoSignIn = (authProvider: string) => {
-  console.log('authProvider:', authProvider);
   const parts = authProvider.split(':');
-  console.log('parts', parts);
   const cognitoSignIn = parts[parts.length - 1].slice(0, -1);
   return cognitoSignIn;
 };

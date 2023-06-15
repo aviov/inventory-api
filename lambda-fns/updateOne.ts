@@ -33,7 +33,6 @@ async function updateOne(one: any, userId: String) {
       prefix = ", ";
     }
  }
-  console.log('params: ', params)
   try {
     const { Attributes: One } = await docClient.update(params).promise();
     const { userId, ...rest } = One;

@@ -7,8 +7,6 @@ const reducer = (accList: any, action: any) => {
     const endUserId = action.endUser && action.endUser.id;
     const endUserWithActionsIndex = accList.findIndex((endUserWithActions: any) =>
       ((endUserWithActions && endUserWithActions.endUser && endUserWithActions.endUser.id) === endUserId));
-    // console.log('endUserId', endUserId);
-    // console.log('endUserWithActionsIndex', endUserWithActionsIndex);
     if (endUserWithActionsIndex !== -1) {
       const endUserWithActionsUpdated = {
         ...accList[endUserWithActionsIndex],

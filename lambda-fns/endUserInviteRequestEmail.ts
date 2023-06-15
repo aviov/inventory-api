@@ -29,11 +29,6 @@ async function endUserInviteRequestEmail(endUserInfo: EndUserInfo, userId: strin
       bodyText,
       subject
     );
-    // console.log(
-    //   'token', token,
-    //   'bodyHtml', bodyHtml,
-    //   'result', JSON.stringify(result)
-    // );
     return endUserInfo;
   } else {
     return null

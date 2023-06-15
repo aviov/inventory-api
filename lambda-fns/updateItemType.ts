@@ -33,7 +33,6 @@ async function updateItemType(itemType: any, userId: String) {
       prefix = ", ";
     }
  }
-  console.log('params: ', params)
   try {
     const { Attributes: Item } = await docClient.update(params).promise();
     const { userId, ...rest } = Item;

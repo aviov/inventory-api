@@ -119,10 +119,8 @@ type AppSyncEvent = {
 };
 
 exports.handler = async (event: AppSyncEvent, context: object) => {
-  // console.log('\n event', event);
   if (event['detail-type'] && event['detail-type'] === 'Scheduled Event') {
     const emailResults = await clientShceduledEmails(event, context);
-    // console.log('emailResult', emailResults);
     return emailResults;
   } else {
     if (event.info && event.info.parentTypeName === 'ActionFuture') {
@@ -156,13 +154,6 @@ exports.handler = async (event: AppSyncEvent, context: object) => {
     const cognitoIdentity = event.identity.cognitoIdentityId;
     const tenant = event.request.headers.tenant;
     const userId = (tenant && tenant !== 'null') ? tenant : cognitoIdentity
-
-    // console.log(
-    //   '\n cognitoSignIn:', cognitoSignIn,
-    //   '\n cognitoIdentity:', cognitoIdentity,
-    //   '\n tenant:', tenant,
-    //   '\n userId:', userId
-    // );
     
     switch (event.info.fieldName) {
       case "listTenants":

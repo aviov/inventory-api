@@ -6,8 +6,6 @@ const clientShceduledEmails = async (event: object, context: object) => {
   
   const actionsFuture = await clientListActionsFuture(event, context);
   const sendList = await clientGetSendList(actionsFuture);
-  // console.log('sendListJSON', JSON.stringify(sendList))
-  // console.log('sendList', sendList);
   
   try {
     return await Promise.all(sendList.map(async (sendData: any) => {
