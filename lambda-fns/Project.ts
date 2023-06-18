@@ -15,6 +15,7 @@ interface Project {
   index: string
   attachments: string
   children: string
+  children2: string
 };
 
 export = Project;

@@ -514,6 +514,7 @@ type Project {
   index: String
   attachments: String
   children: String
+  children2: String
 }
 
 input ProjectInput {
@@ -533,6 +534,7 @@ input ProjectInput {
   index: String
   attachments: String
   children: String
+  children2: String
 }
 
 input ProjectInputUpdate {
@@ -552,6 +554,7 @@ input ProjectInputUpdate {
   index: String
   attachments: String
   children: String
+  children2: String
 }
 
 
