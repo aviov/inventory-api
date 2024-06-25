@@ -1,15 +1,22 @@
-import * as cdk from '@aws-cdk/core';
-import * as cognito from '@aws-cdk/aws-cognito';
-import * as iam from '@aws-cdk/aws-iam';
-import * as appsync from '@aws-cdk/aws-appsync';
-import * as ddb from '@aws-cdk/aws-dynamodb';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as s3 from '@aws-cdk/aws-s3';
-import * as events from '@aws-cdk/aws-events';
-import * as targets from '@aws-cdk/aws-events-targets';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { App, Stack } from 'aws-cdk-lib';                 // core constructs
+import { aws_s3 as s3 } from 'aws-cdk-lib';               // stable module
+import * as codestar from '@aws-cdk/aws-codestar-alpha';  // experimental module
+
+
+import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as appsync from 'aws-cdk-lib/aws-appsync';
+import * as ddb from 'aws-cdk-lib/aws-dynamodb';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+// import * as s3 from '@aws-cdk/aws-s3';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import path = require('path');
 
 export class InventoryApiStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // s3
@@ -35,7 +42,7 @@ export class InventoryApiStack extends cdk.Stack {
 
     // auth tenant pre token generation lambda
     const authTenant = new lambda.Function(this, 'authTenant', {
-      runtime: lambda.Runtime.NODEJS_12_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'auth-tenant.handler',
       code: lambda.Code.fromAsset('lambda-fns')
     });
@@ -72,7 +79,23 @@ export class InventoryApiStack extends cdk.Stack {
       ]
     });
 
-    // iam role
+    // iam unauthenticated role
+    const roleUnauth = new iam.Role(this, 'AppsyncIamRoleUnauthAtInventory', {
+      assumedBy: new iam.FederatedPrincipal(
+        'cognito-identity.amazonaws.com',
+        {
+          StringEquals: {
+            'cognito-identity.amazonaws.com:aud': identityPool.ref,
+          },
+          'ForAnyValue:StringLike': {
+            'cognito-identity.amazonaws.com:amr': 'unauthenticated',
+          },
+        },
+        'sts:AssumeRoleWithWebIdentity'
+      )
+    });
+
+    // iam authenticated role
     const role = new iam.Role(this, 'AppsyncIamRoleAtInventory', {
       assumedBy: new iam.FederatedPrincipal(
         'cognito-identity.amazonaws.com',
@@ -135,7 +158,8 @@ export class InventoryApiStack extends cdk.Stack {
     // api
     const api = new appsync.GraphqlApi(this, 'ApiAtInventory', {
       name: 'inventory-api',
-      schema: appsync.Schema.fromAsset('graphql/schema.graphql'),
+      // definition: appsync.Definition.fromFile(path.join(__dirname, '../graphql/schema.graphql')),
+      schema: appsync.SchemaFile.fromAsset('graphql/schema.graphql'),
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: appsync.AuthorizationType.IAM,
@@ -161,7 +185,7 @@ export class InventoryApiStack extends cdk.Stack {
 
     // lambda data source and resolvers
     const inventoryLambda = new lambda.Function(this, 'AppsyncItemsHandlerAtInventory', {
-      runtime: lambda.Runtime.NODEJS_12_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'appsync-ds-main.handler',
       code: lambda.Code.fromAsset('lambda-fns'),
       memorySize: 1024
@@ -169,187 +193,187 @@ export class InventoryApiStack extends cdk.Stack {
 
     const lambdaDs = api.addLambdaDataSource('lambdaDatasource', inventoryLambda);
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getTenantById", {
       typeName: "Query",
       fieldName: "getTenantById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listTenants", {
       typeName: "Query",
       fieldName: "listTenants"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getTenantUser", {
       typeName: "Query",
       fieldName: "getTenantUser"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listTenantsNotOwn", {
       typeName: "Query",
       fieldName: "listTenantsNotOwn"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listTenantUsers", {
       typeName: "Query",
       fieldName: "listTenantUsers"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getOrgById", {
       typeName: "Query",
       fieldName: "getOrgById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listOrgs", {
       typeName: "Query",
       fieldName: "listOrgs"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getItemById", {
       typeName: "Query",
       fieldName: "getItemById"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getItemBySerialNumber", {
       typeName: "Query",
       fieldName: "getItemBySerialNumber"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listItems", {
       typeName: "Query",
       fieldName: "listItems"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listItemTypes", {
       typeName: "Query",
       fieldName: "listItemTypes"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getItemTypeById", {
       typeName: "Query",
       fieldName: "getItemTypeById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createTenant", {
       typeName: "Mutation",
       fieldName: "createTenant"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteTenant", {
       typeName: "Mutation",
       fieldName: "deleteTenant"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateTenant", {
       typeName: "Mutation",
       fieldName: "updateTenant"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createOrg", {
       typeName: "Mutation",
       fieldName: "createOrg"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteOrg", {
       typeName: "Mutation",
       fieldName: "deleteOrg"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateOrg", {
       typeName: "Mutation",
       fieldName: "updateOrg"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createItem", {
       typeName: "Mutation",
       fieldName: "createItem"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteItem", {
       typeName: "Mutation",
       fieldName: "deleteItem"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateItem", {
       typeName: "Mutation",
       fieldName: "updateItem"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createItemType", {
       typeName: "Mutation",
       fieldName: "createItemType"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteItemType", {
       typeName: "Mutation",
       fieldName: "deleteItemType"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateItemType", {
       typeName: "Mutation",
       fieldName: "updateItemType"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('itemType', {
       typeName: 'Item',
       fieldName: 'itemType'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('actions', {
       typeName: 'Item',
       fieldName: 'actions'
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listEndUsers", {
       typeName: "Query",
       fieldName: "listEndUsers"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getEndUserAccount", {
       typeName: "Query",
       fieldName: "getEndUserAccount"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getEndUserById", {
       typeName: "Query",
       fieldName: "getEndUserById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createEndUser", {
       typeName: "Mutation",
       fieldName: "createEndUser"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateEndUser", {
       typeName: "Mutation",
       fieldName: "updateEndUser"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('verifyEndUserEmailRequest', {
       typeName: "Mutation",
       fieldName: 'verifyEndUserEmailRequest'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('verifyEndUserEmailConfirm', {
       typeName: "Mutation",
       fieldName: 'verifyEndUserEmailConfirm'
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver( "updateTenantUser", {
       typeName: "Mutation",
       fieldName: "updateTenantUser"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteTenantUser", {
       typeName: "Mutation",
       fieldName: "deleteTenantUser"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('inviteTenantUserRequest', {
       typeName: "Mutation",
       fieldName: 'inviteTenantUserRequest'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('inviteTenantUserAccept', {
       typeName: "Mutation",
       fieldName: 'inviteTenantUserAccept'
     });
@@ -360,245 +384,245 @@ export class InventoryApiStack extends cdk.Stack {
     //   fieldName: 'tenantUserInviteAcceptToken'
     // });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteEndUser", {
       typeName: "Mutation",
       fieldName: "deleteEndUser"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createEndUserInfo", {
       typeName: "Mutation",
       fieldName: "createEndUserInfo"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateEndUserInfo", {
       typeName: "Mutation",
       fieldName: "updateEndUserInfo"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('inviteEndUserRequest', {
       typeName: "Mutation",
       fieldName: 'inviteEndUserRequest'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('inviteEndUserConfirm', {
       typeName: "Mutation",
       fieldName: 'inviteEndUserConfirm'
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteEndUserInfo", {
       typeName: "Mutation",
       fieldName: "deleteEndUserInfo"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("clientListActionsFuture", {
       typeName: "Query",
       fieldName: "clientListActionsFuture"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('ActionFuture_item', {
       typeName: 'ActionFuture',
       fieldName: 'item'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('ActionFuture_endUser', {
       typeName: 'ActionFuture',
       fieldName: 'endUser'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('ActionFuture_location', {
       typeName: 'ActionFuture',
       fieldName: 'location'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('ActionFuture_actionType', {
       typeName: 'ActionFuture',
       fieldName: 'actionType'
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listActions", {
       typeName: "Query",
       fieldName: "listActions"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getActionById", {
       typeName: "Query",
       fieldName: "getActionById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createAction", {
       typeName: "Mutation",
       fieldName: "createAction"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateAction", {
       typeName: "Mutation",
       fieldName: "updateAction"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteAction", {
       typeName: "Mutation",
       fieldName: "deleteAction"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('Action_item', {
       typeName: 'Action',
       fieldName: 'item'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('Action_endUser', {
       typeName: 'Action',
       fieldName: 'endUser'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('Action_location', {
       typeName: 'Action',
       fieldName: 'location'
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver('Action_actionType', {
       typeName: 'Action',
       fieldName: 'actionType'
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listActionTypes", {
       typeName: "Query",
       fieldName: "listActionTypes"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getActionTypeById", {
       typeName: "Query",
       fieldName: "getActionTypeById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createActionType", {
       typeName: "Mutation",
       fieldName: "createActionType"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateActionType", {
       typeName: "Mutation",
       fieldName: "updateActionType"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteActionType", {
       typeName: "Mutation",
       fieldName: "deleteActionType"
     });
     
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listActionGangs", {
       typeName: "Query",
       fieldName: "listActionGangs"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getActionGangById", {
       typeName: "Query",
       fieldName: "getActionGangById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createActionGang", {
       typeName: "Mutation",
       fieldName: "createActionGang"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateActionGang", {
       typeName: "Mutation",
       fieldName: "updateActionGang"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteActionGang", {
       typeName: "Mutation",
       fieldName: "deleteActionGang"
     });
     
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listProjects", {
       typeName: "Query",
       fieldName: "listProjects"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getProjectById", {
       typeName: "Query",
       fieldName: "getProjectById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createProject", {
       typeName: "Mutation",
       fieldName: "createProject"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateProject", {
       typeName: "Mutation",
       fieldName: "updateProject"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteProject", {
       typeName: "Mutation",
       fieldName: "deleteProject"
     });
     
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listLocations", {
       typeName: "Query",
       fieldName: "listLocations"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getLocationById", {
       typeName: "Query",
       fieldName: "getLocationById"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createLocation", {
       typeName: "Mutation",
       fieldName: "createLocation"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateLocation", {
       typeName: "Mutation",
       fieldName: "updateLocation"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteLocation", {
       typeName: "Mutation",
       fieldName: "deleteLocation"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("listGroups", {
       typeName: "Query",
       fieldName: "listGroups"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("getGroupById", {
       typeName: "Query",
       fieldName: "getGroupById"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("endUserInfos", {
       typeName: "Group",
       fieldName: "endUserInfos"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("EndUserInfo_endUser", {
       typeName: "EndUserInfo",
       fieldName: "endUser"
     });
 
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("group", {
       typeName: "EndUserInfo",
       fieldName: "group"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("createGroup", {
       typeName: "Mutation",
       fieldName: "createGroup"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("updateGroup", {
       typeName: "Mutation",
       fieldName: "updateGroup"
     });
     
-    lambdaDs.createResolver({
+    lambdaDs.createResolver("deleteGroup", {
       typeName: "Mutation",
       fieldName: "deleteGroup"
     });

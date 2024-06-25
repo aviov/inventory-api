@@ -54,7 +54,6 @@ import {
   getCognitoSignIn,
   sliceStringFrom
 } from './util-fns';
-import { OrganizationPrincipal } from '@aws-cdk/aws-iam';
 
 type AppSyncEvent = {
   info: {
